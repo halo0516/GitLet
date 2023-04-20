@@ -86,6 +86,23 @@ java gitlet.Main merge [branch name]
 Merges files from the given branch into the current branch.
 
 ## Explanation & Use of Class Material
+### 1. Linear Data Structures
+
+In *Gitlet*, the system needs to saver versions of the project periodically whil collaborating with others on a project. If any part of the project is messed up, a previously commited version can be restored. Besides, collaborators should be able to make changes embodied in a commit, and others can incorporate (namely, "merge") corresponding changes into their own versions.
+As a result, a coherent set of files needs to be set up to help retrieve an early version of the project or merge an updated part, where the **linked list** does its work. To revert to the state of the files at a certain commit, the system would go to the corresponding node in the linked list and restore the copies of files found there. At the macro-level, the system will use a head pointer to keep track of where in the linked list users currently are. As users make commits, the head pointer will stay at the front of the linked list, indicating that the latest commit reflects the current state of the files.
+
+### 2. Trees
+
+In addition to maintain older and newer versions of files, *Gitlet* will be able to maintain differing versions. For instance, given two different ideas about how to proceed, *Gitlet* allows users to save both versions and switch between them at will. In this "commit tree," each version can be developed separately. In short, there will be two pointers into the tree, representing the furthest point of each branch. At any given time, only one of these is the currently active pointer, which will be the head pointer in the commit tree. Additionally, the head pointer is the pointer at the front of the current branch.
+
+### 3. Hashing
+
+In real *Git*, every object, or every "blob" (which is every commit in the case of *Gitlet*), has a unique integer ID that serves as a reference to the object. An interesting feature of *Git* is that these IDs are universal. That is, unlike a typical Java implementation, two objects with exactly the same content will have the same ID on all systems. In the case of blobs, same content means the same file contents; in the case of commmits, same content means the same metadata, the same mapping of names to references, and the same parent reference. To accomplish this feature, *Git* uses a cryptographic hash function called SHA-1 (Secure Hash 1) that produces a 160-bit integer hash from any sequence of bytes, which will be the approach used in *Gitlet* as well.
 
 ## Outstanding Questions
+### 1. SHA-1
 
+Since the implementation of *Gitlet* plans on using SHA-1 to simulate the corresponding *Git* feature, further materials on SHA-1 might be needed to handle the possibility of a hashing collision and potential bugs associated with the collision. Furthermore, specific implementations might be needed since there might be a demand to distinguish between hashes for commits and hashes for blobs, which will affect the implementations of the data structures for commits and blobs.
+
+### 2. Going Remote(?)
+Although the tentative ideas mimic most of *Git*'s local features to backup users' own files and maintain multiple versions of them, another powerful feature that *Git* has is its remote features that allow collaboration with other people over the internet, while the users all have access to a shared history of all the changes that all the collaborators have made. As the course already exposes us to the internet connection (such as the News Aggregator assignment), we want to explore further if *Git*'s remote features can be achieved in *Gitlet* if time permits, and may need some assistance on this part if we finally decide to have some of *Git*'s online features achieved in *Gitlet*.

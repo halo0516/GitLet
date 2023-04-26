@@ -3,7 +3,7 @@
 !**.java
 !**.txt
 !**.json
-!**/pom.xml
+!pom.xml
 !.fatweleminus
 !.gitignore
 !library-sp21

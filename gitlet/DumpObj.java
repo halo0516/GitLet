@@ -1,4 +1,4 @@
-package proj2.gitlet;
+package gitlet;
 
 import java.io.File;
 

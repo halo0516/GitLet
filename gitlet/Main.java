@@ -2,11 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.HashMap;
+
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author TODO
@@ -18,8 +14,7 @@ public class Main {
      */
     private static final String GITLET_DIR = ".gitlet/";
 
-    public static void main(String[] args) throws IOException{
-
+    public static void main(String[] args) throws IOException {
         // TODO: what if args is empty?
         //String firstArg = args[0];
         String firstArg = " ";
@@ -31,6 +26,10 @@ public class Main {
                 // TODO: handle the `add [filename]` command
                 break;
             // TODO: FILL THE REST IN
+            case "find":
+                Find f = new Find();
+                f.find(args[1]);
+                break;
             case "commit":
                 Commit c = new Commit(args[1], false);
                 c.commit(false);

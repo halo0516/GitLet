@@ -1,6 +1,8 @@
 package gitlet;
 
-// TODO: any imports you need here
+import java.io.Serializable;
+import java.util.HashMap;
+import java.time.Instant;
 
 import java.util.Date; // TODO: You'll likely use this in this class
 
@@ -11,6 +13,11 @@ import java.util.Date; // TODO: You'll likely use this in this class
  *  @author TODO
  */
 public class Commit {
+
+    private String message;
+    private Instant timestamp;
+    private HashMap<String, String> blobs;
+
     /**
      * TODO: add instance variables here.
      *
@@ -20,7 +27,26 @@ public class Commit {
      */
 
     /** The message of this Commit. */
-    private String message;
 
-    /* TODO: fill in the rest of this class. */
+    public Commit (String message, Instant timestamp, HashMap<String, String> blobs) {
+        this.message = message;
+        this.timestamp = timestamp;
+        this.blobs = blobs;
+    }
+
+    public String getMessage () {
+        return message;
+    }
+
+    public Instant getTimestamp () {
+        return timestamp;
+    }
+
+    public HashMap<String, String> getBlobs () {
+        return blobs;
+    }
+
+    public String getId() {
+        return Utils.sha1((Object) Utils.serialize((Serializable) this));
+    }
 }

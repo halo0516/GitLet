@@ -1,4 +1,4 @@
-package proj2.gitlet;
+package gitlet;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author TODO

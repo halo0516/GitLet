@@ -5,11 +5,22 @@ import java.nio.file.Files;
 import java.util.Objects;
 import java.util.TreeMap;
 
+/**
+ * Driver class to checkout files from the commit history.
+ * <p>
+ *     Usage: java gitlet.Main checkout -- [file name]
+ *     Usage: java gitlet.Main checkout [commit id] -- [file name]
+ *     Usage: java gitlet.Main checkout [branch name]
+ * </p>
+ * @author Lang Qin
+ */
+
 public class Checkout {
 
     private static final File workingDir = new File(System.getProperty("user.dir"));
     private static final File commitsDir = new File(workingDir, ".gitlet/commits");
     private static final File branchDir = new File(workingDir, ".gitlet/branch");
+
 
     /**
      * Takes the version of the file as it exists in the head commit and

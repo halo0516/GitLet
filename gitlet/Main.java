@@ -26,6 +26,13 @@ public class Main {
                 // TODO: handle the `add [filename]` command
                 break;
             // TODO: FILL THE REST IN
+            case "global-log":
+                Log l = new Log();
+                l.globallog();
+            case "log":
+                l = new Log();
+                l.log();
+                break;
             case "find":
                 Find f = new Find();
                 f.find(args[1]);
@@ -34,6 +41,7 @@ public class Main {
                 Commit c = new Commit(args[1], false);
                 c.commit(false);
                 break;
+
         }
     }
 }

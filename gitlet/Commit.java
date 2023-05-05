@@ -13,10 +13,10 @@ import java.util.Date;
  *  @author
  */
 public class Commit implements Serializable {
-    static File commitPath = new File(System.getProperty("user.dir") + "/.gitlet/Commits");
-    static File serialPath = new File(System.getProperty("user.dir") + "/.gitlet/Serialized");
-    static File stagePath = new File(System.getProperty("user.dir") + "/.gitlet/Staging Area");
-    static File removePath = new File(System.getProperty("user.dir") + "/.gitlet/Removed Files");
+    static File commitPath = new File(System.getProperty("user.dir") + "/.gitlet/commits");
+    static File serialPath = new File(System.getProperty("user.dir") + "/.gitlet/branch");
+    static File stagePath = new File(System.getProperty("user.dir") + "/.gitlet/stage");
+    static File removePath = new File(System.getProperty("user.dir") + "/.gitlet/remove");
     File prevFile;
     String logMsg;
     String timeStamp;
@@ -79,7 +79,7 @@ public class Commit implements Serializable {
         }
         if (!init) {
             this.prevFile = (new File(
-                new File(System.getProperty("user.dir") + "/.gitlet/Commits") + this.parentHash));
+                commitPath + this.parentHash));
         }
         if (stagePath.listFiles().length != 0) {
             for (File f : stagePath.listFiles()) {

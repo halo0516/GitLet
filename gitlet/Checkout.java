@@ -68,7 +68,7 @@ public class Checkout {
      * overwriting the version of the file that's already there if
      * there is one. The new version of the file is not staged.
      * <p>
-     * Usage: Usage: java gitlet.Main checkout [branch name]
+     * Usage: Usage: java gitlet.Main checkout [commit id] -- [file name]
      */
     public void checkoutFile(String fileName, String ID) {
         // load the branch history

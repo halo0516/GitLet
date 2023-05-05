@@ -1,7 +1,6 @@
 package gitlet;
 
 import java.text.*;
-import java.time.Instant;
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;
@@ -9,16 +8,15 @@ import java.nio.file.Files;
 import java.util.Date;
 
 /** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
  *
- *  @author TODO
+ *  @author
  */
 public class Commit implements Serializable {
-    static File commitPath = new File(System.getProperty("user.dir") + "/.gitlet/Commits");
-    static File serialPath = new File (System.getProperty("user.dir") + "/.gitlet/Serialized");
-    static File stagePath = new File(System.getProperty("user.dir") + "/.gitlet/Staging Area");
-    static File removePath = new File(System.getProperty("user.dir") + "/.gitlet/Removed Files");
+    static File commitPath = new File(System.getProperty("user.dir") + "/.gitlet/commits");
+    static File serialPath = new File(System.getProperty("user.dir") + "/.gitlet/branch");
+    static File stagePath = new File(System.getProperty("user.dir") + "/.gitlet/stage");
+    static File removePath = new File(System.getProperty("user.dir") + "/.gitlet/remove");
     File prevFile;
     String logMsg;
     String timeStamp;
@@ -38,7 +36,7 @@ public class Commit implements Serializable {
     }
 
     /**
-     * TODO: add instance variables here.
+     *
      *
      * List all instance variables of the Commit class here with a useful
      * comment above them describing what that variable represents and how that
@@ -47,7 +45,7 @@ public class Commit implements Serializable {
 
     /** The message of this Commit. */
 
-    public Commit (String message, Boolean init) {
+    public Commit(String message, Boolean init) {
         this.logMsg = message;
         DateFormat dateF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         this.timeStamp = dateF.format(new Date());
@@ -68,19 +66,20 @@ public class Commit implements Serializable {
                 new FileInputStream(serialPath + "/tracked.txt"));
             this.trace = (TreeSet) input.readObject();
             input.close();
-        } catch(IOException | ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             this.trace = new TreeSet<>();
         }
         try {
             ObjectInputStream input = new ObjectInputStream(
-                new FileInputStream(serialPath + "/removeMark" + ptrs.get("HEAD") +".txt"));
+                new FileInputStream(serialPath + "/removeMark" + ptrs.get("HEAD") + ".txt"));
             this.removedMark = (TreeSet) input.readObject();
             input.close();
-        }catch (IOException | ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             this.removedMark = new TreeSet<>();
         }
-        if(!init) {
-            this.prevFile = (new File(new File(System.getProperty("user.dir") + "/.gitlet/Commits") + this.parentHash));
+        if (!init) {
+            this.prevFile = (new File(
+                commitPath + this.parentHash));
         }
         if (stagePath.listFiles().length != 0) {
             for (File f : stagePath.listFiles()) {
@@ -132,7 +131,7 @@ public class Commit implements Serializable {
                 trace.add(f.getName());
             }
         }
-        if(!ptrs.isEmpty()) {
+        if (!ptrs.isEmpty()) {
             this.parentHash = ptrs.get(ptrs.get("HEAD"));
         }
         if (parentHash == null) {

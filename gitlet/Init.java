@@ -107,6 +107,14 @@ public class Init {
             System.out.println("Error:");
             System.out.println("    Could not create branch directory.");
             cleanUp();
+            return;
+        }
+
+        File removeDir = new File(gitDir, "remove/");
+        if (!removeDir.mkdir()) {
+            System.out.println("Error:");
+            System.out.println("    Could not create remove directory.");
+            cleanUp();
         }
     }
 

@@ -10,7 +10,7 @@ import java.util.Date;
 /** Represents a gitlet commit object.
  *  does at a high level.
  *
- *  @author
+ *  @author Yuxiang Wang
  */
 public class Commit implements Serializable {
     static File commitPath = new File(System.getProperty("user.dir") + "/.gitlet/commits");
@@ -24,8 +24,9 @@ public class Commit implements Serializable {
     String commitHash;
     TreeSet<String> stageSet = new TreeSet<>();
     TreeMap<String, String> ptrs;
-    TreeSet removedMark = new TreeSet<>();
-    TreeSet<String> trace = new TreeSet<>();
+    TreeSet<String> removedMark;
+    TreeSet<String> trace;
+
 
     public String getMessage() {
         return "Commit{"
@@ -36,14 +37,10 @@ public class Commit implements Serializable {
     }
 
     /**
-     *
-     *
      * List all instance variables of the Commit class here with a useful
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided one example for `message`.
      */
-
-    /** The message of this Commit. */
 
     public Commit(String message, Boolean init) {
         this.logMsg = message;
@@ -52,11 +49,12 @@ public class Commit implements Serializable {
         try {
             ObjectInputStream input = new ObjectInputStream(
                 new FileInputStream(serialPath + "/pointers.txt"));
-            this.ptrs = (TreeMap) input.readObject();
+            this.ptrs = (TreeMap<String, String>) input.readObject();
             input.close();
         } catch (IOException | ClassNotFoundException e) {
             this.ptrs = new TreeMap<>();
         }
+
         if (ptrs.containsKey("HEAD")) {
             this.parentHash = ptrs.get("HEAD");
         }
@@ -64,27 +62,28 @@ public class Commit implements Serializable {
         try {
             ObjectInputStream input = new ObjectInputStream(
                 new FileInputStream(serialPath + "/tracked.txt"));
-            this.trace = (TreeSet) input.readObject();
+            this.trace = (TreeSet<String>) input.readObject();
             input.close();
         } catch (IOException | ClassNotFoundException e) {
             this.trace = new TreeSet<>();
         }
+
         try {
             ObjectInputStream input = new ObjectInputStream(
                 new FileInputStream(serialPath + "/removeMark" + ptrs.get("HEAD") + ".txt"));
-            this.removedMark = (TreeSet) input.readObject();
+            this.removedMark = (TreeSet<String>) input.readObject();
             input.close();
         } catch (IOException | ClassNotFoundException e) {
             this.removedMark = new TreeSet<>();
         }
+
         if (!init) {
             this.prevFile = (new File(
                 commitPath + this.parentHash));
         }
-        if (stagePath.listFiles().length != 0) {
-            for (File f : stagePath.listFiles()) {
-                stageSet.add(f.getName());
-            }
+        stagePath.listFiles();
+        for (File f : stagePath.listFiles()) {
+            stageSet.add(f.getName());
         }
     }
 

@@ -104,7 +104,7 @@ public class Stage {
         try {
             ObjectInputStream ois = new ObjectInputStream(
                     new FileInputStream(bPath + "/pointers.txt"));
-            ptr = (TreeMap) ois.readObject();
+            ptr = (TreeMap<String, String>) ois.readObject();
             ois.close();
         } catch (IOException | ClassNotFoundException e) {
             ptr = new TreeMap<>();

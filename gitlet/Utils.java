@@ -60,7 +60,7 @@ class Utils {
     /** Returns the SHA-1 hash of the concatenation of the strings in
      *  VALS. */
     static String sha1(List<Object> vals) {
-        return sha1(vals.toArray(new Object[vals.size()]));
+        return sha1(vals.toArray(new Object[0]));
     }
 
     /* FILE DELETION */
@@ -235,5 +235,20 @@ class Utils {
     static void message(String msg, Object... args) {
         System.out.printf(msg, args);
         System.out.println();
+    }
+
+
+    /* OTHER UTILITIES */
+    static void deleteDirectory(File directory) {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File f : files) {
+                deleteDirectory(f);
+            }
+        }
+
+        if (!directory.delete()) {
+            throw error("Directory not deleted");
+        }
     }
 }

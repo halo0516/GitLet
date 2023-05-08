@@ -42,6 +42,16 @@ public class Commit implements Serializable {
                 '}';
     }
 
+
+    /**
+     * Constructs a Commit object using a log message and an initial flag.
+     * Initializes the commit's log message, timestamp, pointers, tracked files, and removedMark set.
+     * If the commit is not initial, sets the previous commit's files.
+     * Also adds files from the staging area to the stageSet.
+     *
+     * @param msg The log message for the commit.
+     * @param initial A boolean indicating whether the commit is an initial commit or not.
+     */
     public Commit(String msg, boolean initial) {
         this.logMessage = msg;
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -64,6 +74,17 @@ public class Commit implements Serializable {
         }
     }
 
+    /**
+     * Commits changes to the repository by creating a new commit object and storing it.
+     * If there are no changes added to the commit, and it is not initial, prints a message and returns.
+     * Deletes files in the removed files directory, and checks if the log message is provided.
+     * Creates a new commit folder and writes the commit's log message, timestamp, and parent hash to files.
+     * Copies files from the previous commit to the new commit folder and moves files from the staging area.
+     * Updates pointers and tracked files and writes them to serialized files.
+     *
+     * @param initial A boolean indicating whether the commit is an initial commit or not.
+     * @throws IOException If an I/O error occurs during the commit process.
+     */
     public void commit(boolean initial) throws IOException {
         if (stageSet.isEmpty() && !initial && Objects.requireNonNull(REMOVED_FILES.listFiles()).length == 0) {
             System.out.println("No changes added to the commit.");
@@ -135,6 +156,17 @@ public class Commit implements Serializable {
         writeObjectToFile(SERIALIZED_DIR + "/tracked.txt", tracked);
     }
 
+    /**
+     * [Helper Method]
+     * Reads an object from a file and returns the object, or returns a default value if an exception occurs.
+     * Utilizes Java's built-in object serialization to read the object from the file.
+     * Catches IOException and ClassNotFoundException and returns the provided default value in case of an error.
+     *
+     * @param filePath The path to the file containing the serialized object.
+     * @param defaultValue The default value to be returned if an exception occurs during deserialization.
+     * @param <T> The type of the object to be read from the file.
+     * @return The deserialized object if successful, or the default value if an exception occurs.
+     */
     private <T> T readObjectFromFile(String filePath, T defaultValue) {
         try (ObjectInputStream inp = new ObjectInputStream(new FileInputStream(filePath))) {
             return (T) inp.readObject();
@@ -143,6 +175,14 @@ public class Commit implements Serializable {
         }
     }
 
+    /**
+     * [Helper Method]
+     * Writes an object to a file using Java's built-in object serialization.
+     * Catches IOException and prints an error message if serialization fails.
+     *
+     * @param filePath The path to the file where the serialized object will be written.
+     * @param obj The object to be serialized and written to the file.
+     */
     private void writeObjectToFile(String filePath, Object obj) {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filePath))) {
             out.writeObject(obj);

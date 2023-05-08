@@ -38,6 +38,15 @@ public class Stage {
             removed = new TreeSet<>();
         }
         
+        // Checks if the file exists in the working directory;
+        // if it does, then checks if the file name is set
+        // to be removed from Stage class, which is tracked by the removed set;
+        // if it does, then it is changed to be false.
+        // If it is the first time adding to the file,
+        // then the file name is added to 1. the id map with the value being the hash ID (hash),
+        // 2. the removed set, and 3. the tracked set
+        // If the file is a new version, we then check if the hash IDs are the same
+        // and update the IDs accordingly.
         if (!f.exists()) {
             System.out.println("File does not exist.");
         } else if ((new File(workingDirectory + "/.gitlet/remove/" + f.getName())).exists()) {
@@ -89,6 +98,9 @@ public class Stage {
     }
     
     public void rm(File f) {
+        // Try to access the HEAD key in the ptr map by the key HEAD,
+        // which gives the value as the corresponding branch;
+        // with the key master, we will receive the most recent commit.
         try {
             ObjectInputStream ois = new ObjectInputStream(
                     new FileInputStream(bPath + "/pointers.txt"));
@@ -116,6 +128,7 @@ public class Stage {
             removed = new TreeSet<>();
         }
         
+        // If the file was being tracked, deletes from the working directory.
         String head = ptr.get("HEAD");
         String branch = ptr.get(head);
         String commitHash = ptr.get(branch);

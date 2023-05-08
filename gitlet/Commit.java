@@ -44,8 +44,10 @@ public class Commit implements Serializable {
 
     public Commit(String message, Boolean init) {
         this.logMsg = message;
+
         DateFormat dateF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         this.timeStamp = dateF.format(new Date());
+
         try {
             ObjectInputStream input = new ObjectInputStream(
                 new FileInputStream(serialPath + "/pointers.txt"));
@@ -56,7 +58,7 @@ public class Commit implements Serializable {
         }
 
         if (ptrs.containsKey("HEAD")) {
-            this.parentHash = ptrs.get("HEAD");
+            this.parentHash = ptrs.get(ptrs.get("HEAD"));
         }
 
         try {
@@ -79,7 +81,7 @@ public class Commit implements Serializable {
 
         if (!init) {
             this.prevFile = (new File(
-                commitPath + this.parentHash));
+                commitPath, this.parentHash));
         }
         stagePath.listFiles();
         for (File f : stagePath.listFiles()) {
@@ -89,44 +91,49 @@ public class Commit implements Serializable {
 
     public void commit(boolean init) throws IOException {
         // If no changes have been staged and there are no files in the removal directory, exit the method
-        if (stageSet.isEmpty() && !init && removePath.listFiles().length == 0) {
+        if (stageSet.isEmpty() && !init && Objects.requireNonNull(removePath.listFiles()).length == 0) {
             System.out.println("No changes added to the commit.");
             return;
         }
+
         // If there are files in the removal directory, delete them
-        if (removePath.listFiles().length > 0) {
-            for (File f : removePath.listFiles()) {
-                f.delete();
-            }
+        Objects.requireNonNull(removePath.listFiles());
+        for (File f : Objects.requireNonNull(removePath.listFiles())) {
+            f.delete();
         }
+
         // If there is no commit message, prompt the user to enter one
-        if (logMsg == null || logMsg.isEmpty() || logMsg.equals(" ")) {
+        if (logMsg == null || logMsg.isEmpty()) {
             System.out.println("Please enter a commit message.");
         }
+
         // Generate a SHA-1 hash for the commit message
         commitHash = Utils.sha1(this.getMessage());
 
         // Create a new folder with the commit hash as its name
         File newFolder = new File(commitPath, commitHash);
-        newFolder.mkdir();
+        if (!newFolder.mkdir()) {
+            System.out.println("Error:");
+            System.out.println("    Failed to create new folder.");
+        }
 
         // Create a file for the commit message and write the message to it
-        File logMsgFile = new File(commitPath + "/" + commitHash, "/logMsg.txt");
-        Utils.writeContents(logMsgFile, logMsg.getBytes());
+        File logMsgFile = new File(commitPath + "/" + commitHash, "logMsg.txt");
+        Utils.writeContents(logMsgFile, (Object) logMsg.getBytes());
 
         // Create a file for the timestamp and write the timestamp to it
-        File timeStampFile = new File(commitPath + "/" + commitHash, "/timeStamp.txt");
-        Utils.writeContents(timeStampFile, timeStamp.getBytes());
+        File timeStampFile = new File(commitPath + "/" + commitHash, "timeStamp.txt");
+        Utils.writeContents(timeStampFile, (Object) timeStamp.getBytes());
 
         // If there is a parent commit, create a file for the parent commit hash and write the hash to it
         if (parentHash != null) {
-            File parentHashFile = new File(commitPath + "/" + commitHash, "/parentHash.txt");
-            Utils.writeContents(parentHashFile, parentHash.getBytes());
+            File parentHashFile = new File(commitPath + "/" + commitHash, "parentHash.txt");
+            Utils.writeContents(parentHashFile, (Object) parentHash.getBytes());
         }
 
         // If there are files in the previous commit, copy them over to the new commit directory
         if (prevFile != null) {
-            for (File f : prevFile.listFiles()) {
+            for (File f : Objects.requireNonNull(prevFile.listFiles())) {
                 // If the file is not in the stage set or is a metadata file, skip it
                 if (!stageSet.contains(f.getName())
                     && !(f.getName().equals("logMsg.txt"))
@@ -142,8 +149,11 @@ public class Commit implements Serializable {
 
         // Move all staged files to the new commit directory and add them to the trace list
         if (!stageSet.isEmpty()) {
-            for (File f: stagePath.listFiles()) {
-                f.renameTo(new File(commitPath + "/" + commitHash + "/" + f.getName()));
+            for (File f: Objects.requireNonNull(stagePath.listFiles())) {
+                if (!f.renameTo(new File(commitPath + "/" + commitHash + "/" + f.getName()))) {
+                    System.out.println("Error:");
+                    System.out.println("    Failed to move staged files.");
+                }
                 trace.add(f.getName());
             }
         }

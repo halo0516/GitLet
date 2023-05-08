@@ -10,6 +10,13 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+/**
+ * Represents a gitlet commit object.
+ * does at a high level.
+ *
+ * @author Yuxiang Wang
+ */
+
 public class Commit implements Serializable {
     private static final String GITLET_DIR = System.getProperty("user.dir") + "/.gitlet";
     private static final File COMMIT_DIR = new File(GITLET_DIR + "/commits");

@@ -89,58 +89,81 @@ public class Commit implements Serializable {
     }
 
     public void commit(boolean init) throws IOException {
+        // If no changes have been staged and there are no files in the removal directory, exit the method
         if (stageSet.isEmpty() && !init && removePath.listFiles().length == 0) {
             System.out.println("No changes added to the commit.");
             return;
         }
+        // If there are files in the removal directory, delete them
         if (removePath.listFiles().length > 0) {
             for (File f : removePath.listFiles()) {
                 f.delete();
             }
         }
-
+        // If there is no commit message, prompt the user to enter one
         if (logMsg == null || logMsg.isEmpty() || logMsg.equals(" ")) {
             System.out.println("Please enter a commit message.");
         }
+        // Generate a SHA-1 hash for the commit message
         commitHash = Utils.sha1(this.getMessage());
+
+        // Create a new folder with the commit hash as its name
         File newFolder = new File(commitPath, commitHash);
         newFolder.mkdir();
+
+        // Create a file for the commit message and write the message to it
         File logMsgFile = new File(commitPath + "/" + commitHash, "/logMsg.txt");
         Utils.writeContents(logMsgFile, logMsg.getBytes());
+
+        // Create a file for the timestamp and write the timestamp to it
         File timeStampFile = new File(commitPath + "/" + commitHash, "/timeStamp.txt");
         Utils.writeContents(timeStampFile, timeStamp.getBytes());
+
+        // If there is a parent commit, create a file for the parent commit hash and write the hash to it
         if (parentHash != null) {
             File parentHashFile = new File(commitPath + "/" + commitHash, "/parentHash.txt");
             Utils.writeContents(parentHashFile, parentHash.getBytes());
         }
+
+        // If there are files in the previous commit, copy them over to the new commit directory
         if (prevFile != null) {
             for (File f : prevFile.listFiles()) {
+                // If the file is not in the stage set or is a metadata file, skip it
                 if (!stageSet.contains(f.getName())
                     && !(f.getName().equals("logMsg.txt"))
                     && !(f.getName().equals("timeStamp.txt"))
                     && !(f.getName().equals("parentHash.txt"))
                     && !(removedMark.contains(f.getName()))) {
+                    // Copy the file to the new commit directory
                     Files.copy(f.toPath(), Paths.get(commitPath + "/"
                         + commitHash + "/" + f.getName()));
                 }
             }
         }
+
+        // Move all staged files to the new commit directory and add them to the trace list
         if (!stageSet.isEmpty()) {
             for (File f: stagePath.listFiles()) {
                 f.renameTo(new File(commitPath + "/" + commitHash + "/" + f.getName()));
                 trace.add(f.getName());
             }
         }
+
+        // Update the parent hash pointer
         if (!ptrs.isEmpty()) {
             this.parentHash = ptrs.get(ptrs.get("HEAD"));
         }
+
+        // If there is no parent hash, set the HEAD and master pointers to the new commit hash
         if (parentHash == null) {
             ptrs.put("HEAD", "master");
             ptrs.put("master", commitHash);
         } else {
+            // Otherwise, update the pointer for the current branch to the new commit hash
             ptrs.put(ptrs.get("HEAD"), commitHash);
         }
 
+        // Serialize the trace list and write it to a file
         File ptrsFile = new File(serialPath + "/pointers.txt");
         try {
             ObjectOutputStream output = new ObjectOutputStream(

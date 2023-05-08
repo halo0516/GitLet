@@ -15,8 +15,10 @@ public class Log {
     String timeStamp;
 
     public void log() {
+        // If the Commit directory exists and is not empty, proceed
         if (commitPath.listFiles() != null) {
             try {
+                // Load the pointers map from the HEAD pointer file
                 FileInputStream input = new FileInputStream(ptrPath);
                 ObjectInputStream objInput = new ObjectInputStream(input);
                 this.ptrs = (TreeMap) objInput.readObject();
@@ -25,13 +27,18 @@ public class Log {
             } catch (IOException | ClassNotFoundException e) {
                 return;
             }
+
+            // Get the current branch and commit ID from the pointers map
             this.currentBranch = ptrs.get("HEAD");
             this.currentCommit = ptrs.get(currentBranch);
 
+            // Load the parent commit ID from the parentHash.txt file of the current commit
             File optPath = new File(commitPath + "/" + currentCommit + "/parentHash.txt");
             if (optPath.exists()) {
                 this.parentID = new String(Utils.readContents(optPath));
             }
+
+            // Loop through the parent commits and print out their information
             while (optPath.exists()) {
                 this.logMsg = new String(Utils.readContents(
                     new File(commitPath + "/" + currentCommit + "/logMsg.txt")));
@@ -42,6 +49,8 @@ public class Log {
                 System.out.println("TimeStamp: " + timeStamp);
                 System.out.println("Log Message: " + logMsg);
                 System.out.println();
+
+                // Update the current commit ID to the parent commit ID
                 currentCommit = parentID;
                 if (optPath.exists()) {
                     parentID = new String(Utils.readContents(optPath));
@@ -60,7 +69,9 @@ public class Log {
         }
     }
     public void globallog() {
+        // If the Commit directory exists and is not empty, proceed
         if (commitPath.listFiles() != null) {
+            // Loop through all the commit directories and print out their information
             for (File commit : commitPath.listFiles()) {
                 this.logMsg = new String(Utils.readContents(
                     new File(commit + "/logMsg.txt")));

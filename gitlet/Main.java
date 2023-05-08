@@ -1,6 +1,5 @@
 package gitlet;
 
-import java.io.File;
 import java.io.IOException;
 
 
@@ -15,57 +14,101 @@ public class Main {
     private static final String GITLET_DIR = ".gitlet/";
 
     public static void main(String[] args) throws IOException {
-        // TODO: what if args is empty?
-        //String firstArg = args[0];
-        String firstArg = " ";
+        if (!isValidInput(args)) {
+            return;
+        }
+
+        String firstArg = args[0];
         switch(firstArg) {
             case "init":
-                // TODO: handle the `init` command
-                Init i = new Init();
-                i.init();
+                (new Init()).init();
                 break;
             case "add":
-                Stage s = new Stage();
-                s.add(new File(args[1]));
-                break;
-            // TODO: FILL THE REST IN
-            case "commit":
-                Commit c = new Commit(args[1], false);
-                c.commit(false);
-                break;
-            case "rm":
-                s = new Stage();
-                s.rm(new File(args[1]));
-                break;
-            case "log":
-                Log l = new Log();
-                l.log();
+                // TODO: handle the `add [filename]` command
                 break;
             case "global-log":
-                l = new Log();
-                l.globallog();
+                (new Log()).globallog();
+                break;
+            case "log":
+                (new Log()).log();
+                break;
             case "find":
-                Find f = new Find();
-                f.find(args[1]);
+                find(args);
                 break;
-            case "status":
-                s = new Stage();
-                s.status();
+            case "commit":
+                commit(args);
+                break;
             case "checkout":
-                // TODO
-                break;
-            case "branch":
-                // TODO
-                break;
-            case "rm-branch":
-                // TODO
-                break;
-            case "reset":
-                // TODO
-                break;
-            case "merge":
-                // TODO
+                checkout(args);
                 break;
         }
+    }
+
+    /**
+     * Handles the `find` command.
+     * @param args the arguments passed to the `find` command
+     */
+    private static void find(String[] args) {
+        if (args.length != 2) {
+            System.out.println("Incorrect operands.");
+            return;
+        }
+
+        Find f = new Find();
+        f.find(args[1]);
+    }
+
+    /**
+     * Handles the `commit` command.
+     * @param args the arguments passed to the `commit` command
+     * @throws IOException if an I/O error occurs
+     */
+    private static void commit(String[] args) throws IOException {
+        if (args.length < 2) {
+            System.out.println("Please enter a commit message.");
+            return;
+        }
+
+        Commit c = new Commit(args[1], false);
+        c.commit(false);
+    }
+
+    /** Handles the `checkout` command.
+     * @param args the arguments passed to the `checkout` command
+     */
+    private static void checkout(String[] args) {
+        if (args.length < 1 || args.length > 4) {
+            System.out.println("Incorrect operands.");
+            return;
+        }
+
+        Checkout co = new Checkout();
+        if (args.length == 2) {
+            co.checkoutBranch(args[1]);
+        } else {
+            if (args[1].equals("--")) {
+                co.checkoutFile(args[2]);
+            } else {
+                if (args[2].equals("--")) {
+                    co.checkoutFile(args[1], args[3]);
+                } else {
+                    System.out.println("Incorrect operands.");
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if the input operands are valid.
+     * @param args the input operands
+     * @return true if the input operands are valid, false otherwise
+     */
+    private static boolean isValidInput(String[] args) {
+        if (args.length == 0) {
+            System.out.println("Error:");
+            System.out.println("    Please enter a command.");
+            return false;
+        }
+        return true;
     }
 }

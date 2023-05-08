@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 
 /**
- * Driver class to checkout files from the commit history.
+ * Driver class to check out files from the commit history.
  * <p>
  *     Usage: java gitlet.Main checkout -- [file name]
  *     Usage: java gitlet.Main checkout [commit id] -- [file name]

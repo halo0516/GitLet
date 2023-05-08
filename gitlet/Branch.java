@@ -3,7 +3,11 @@ package gitlet;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.TreeMap;
-import java.util.TreeSet;
+
+/** Branch class for Gitlet, responsible for creating and removing branches.
+ *
+ * @author Zitong Shi
+ */
 
 public class Branch {
     String currentDirectory = System.getProperty("user.dir");

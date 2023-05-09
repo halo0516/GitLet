@@ -5,12 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,7 +37,7 @@ public class GitletTest {
     }
 
     @Test
-    public void testGitlet() throws IOException {
+    public void testIntiAndStage() throws IOException {
         // Initialize the Gitlet version control system
         Init init = new Init();
         init.init();
@@ -158,5 +156,29 @@ public class GitletTest {
         } catch (IOException | ClassNotFoundException e) {
             fail("Failed to read branch pointers");
         }
+    }
+
+    @Test
+    void testCheckoutBranch() throws IOException {
+        // go through the init, stage, commit, and branch process
+        // then test checkout branch
+        Init init = new Init();
+        init.init();
+
+        Stage stage = new Stage();
+        stage.add(testFile);
+        Commit commit = new Commit("Initial commit", true);
+        commit.commit(true);
+
+        Branch branch = new Branch();
+        branch.branch("new_branch");
+
+        Checkout checkout = new Checkout();
+        checkout.checkoutBranch("new_branch");
+
+        Branch branch2 = new Branch();
+        branch2.branch("new_branch2");
+
+        (new Checkout()).checkoutBranch("new_branch1");
     }
 }

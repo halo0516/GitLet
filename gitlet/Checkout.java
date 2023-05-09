@@ -204,7 +204,7 @@ public class Checkout {
 
             // skipp the logMessage.txt, timeStamp.txt, and parentHash.txt
             if ((f.getName().equals("logMessage.txt")) || (f.getName().equals("timeStamp.txt")
-                || (f.getName().equals("parentHash.txt")))) {
+                    || (f.getName().equals("parentHash.txt")))) {
                 continue;
             }
 
@@ -238,7 +238,7 @@ public class Checkout {
         for (File f : Objects.requireNonNull(currBranchDir.listFiles())) {
             // ignore the logMessage.txt, timeStamp.txt, and parentHash.txt
             if ((f.getName().equals("logMessage.txt")) || (f.getName().equals("timeStamp.txt")
-                || (f.getName().equals("parentHash.txt")))) {
+                    || (f.getName().equals("parentHash.txt")))) {
                 continue;
             }
 

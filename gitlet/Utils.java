@@ -63,31 +63,6 @@ class Utils {
         return sha1(vals.toArray(new Object[0]));
     }
 
-    /* FILE DELETION */
-
-    /** Deletes FILE if it exists and is not a directory.  Returns true
-     *  if FILE was deleted, and false otherwise.  Refuses to delete FILE
-     *  and throws IllegalArgumentException unless the directory designated by
-     *  FILE also contains a directory named .gitlet. */
-    static boolean restrictedDelete(File file) {
-        if (!(new File(file.getParentFile(), ".gitlet")).isDirectory()) {
-            throw new IllegalArgumentException("not .gitlet working directory");
-        }
-        if (!file.isDirectory()) {
-            return file.delete();
-        } else {
-            return false;
-        }
-    }
-
-    /** Deletes the file named FILE if it exists and is not a directory.
-     *  Returns true if FILE was deleted, and false otherwise.  Refuses
-     *  to delete FILE and throws IllegalArgumentException unless the
-     *  directory designated by FILE also contains a directory named .gitlet. */
-    static boolean restrictedDelete(String file) {
-        return restrictedDelete(new File(file));
-    }
-
     /* READING AND WRITING FILE CONTENTS */
 
     /** Return the entire contents of FILE as a byte array.  FILE must
@@ -136,27 +111,6 @@ class Utils {
         }
     }
 
-    /** Return an object of type T read from FILE, casting it to EXPECTEDCLASS.
-     *  Throws IllegalArgumentException in case of problems. */
-    static <T extends Serializable> T readObject(File file,
-                                                 Class<T> expectedClass) {
-        try {
-            ObjectInputStream in =
-                new ObjectInputStream(new FileInputStream(file));
-            T result = expectedClass.cast(in.readObject());
-            in.close();
-            return result;
-        } catch (IOException | ClassCastException
-                 | ClassNotFoundException excp) {
-            throw new IllegalArgumentException(excp.getMessage());
-        }
-    }
-
-    /** Write OBJ to FILE. */
-    static void writeObject(File file, Serializable obj) {
-        writeContents(file, serialize(obj));
-    }
-
     /* DIRECTORIES */
 
     /** Filter out all but plain files. */
@@ -181,21 +135,8 @@ class Utils {
         }
     }
 
-    /** Returns a list of the names of all plain files in the directory DIR, in
-     *  lexicographic order as Java Strings.  Returns null if DIR does
-     *  not denote a directory. */
-    static List<String> plainFilenamesIn(String dir) {
-        return plainFilenamesIn(new File(dir));
-    }
 
     /* OTHER FILE UTILITIES */
-
-    /** Return the concatentation of FIRST and OTHERS into a File designator,
-     *  analogous to the {link Paths.get(String, String[])}
-     *  method. */
-    static File join(String first, String... others) {
-        return Paths.get(first, others).toFile();
-    }
 
     /** Return the concatentation of FIRST and OTHERS into a File designator,
      *  analogous to the {link Paths.get(String, String[])}
@@ -228,13 +169,6 @@ class Utils {
      *  for the String.format method. */
     static GitletException error(String msg, Object... args) {
         return new GitletException(String.format(msg, args));
-    }
-
-    /** Print a message composed from MSG and ARGS as for the String.format
-     *  method, followed by a newline. */
-    static void message(String msg, Object... args) {
-        System.out.printf(msg, args);
-        System.out.println();
     }
 
 

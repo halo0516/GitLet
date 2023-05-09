@@ -9,7 +9,6 @@ import java.util.TreeMap;
  * Driver class to check out files from the commit history.
  * <p>
  *     Usage: java gitlet.Main checkout -- [file name]
- *     Usage: java gitlet.Main checkout [commit id] -- [file name]
  *     Usage: java gitlet.Main checkout [branch name]
  * </p>
  * @author Lang Qin
@@ -46,70 +45,6 @@ public class Checkout {
         // load the commit history
         String currBranch = branchHistory.get(branchHistory.get("HEAD"));
         File fileToCheckout = new File(commitsDir,  currBranch + "/" + fileName);
-
-        if (!fileToCheckout.exists()) {
-            System.out.println("Warning:");
-            System.out.println("    File does not exist in that commit.");
-            return;
-        }
-
-        // set the file to the version in the head commit
-        File fileInWorkingDir = new File(workingDir, fileToCheckout.getName());
-
-        if (fileInWorkingDir.exists()) {
-            if (!fileInWorkingDir.delete()) {
-                System.out.println("Error:");
-                System.out.println("    Could not delete file in working directory.");
-                return;
-            }
-        }
-
-        try {
-            Files.copy(fileToCheckout.toPath(), (new File(workingDir, fileName)).toPath());
-        } catch (IOException e) {
-            System.out.println("Error:");
-            System.out.println("    Could not copy file to working directory.");
-        }
-    }
-
-
-    /**
-     * Takes version of the file as it exists in the commit
-     * within the given id, and puts it in the working directory,
-     * overwriting the version of the file that's already there if
-     * there is one. The new version of the file is not staged.
-     * <p>
-     * Usage: Usage: java gitlet.Main checkout [commit id] -- [file name]
-     */
-    public void checkoutFile(String fileName, String ID) {
-        // load the branch history
-        TreeMap<String, String> branchHistory;
-        try {
-            ObjectInputStream in = new ObjectInputStream(
-                    new FileInputStream(new File(branchDir, "pointers.txt")));
-            branchHistory = (TreeMap<String, String>) in.readObject();
-            in.close();
-        } catch (IOException | ClassNotFoundException e) {
-            branchHistory = new TreeMap<>();
-        }
-
-        // find the commit with the given ID
-        String commitID = null;
-        for (File commit : Objects.requireNonNull(commitsDir.listFiles())) {
-            String currID = commit.getName().substring(0, ID.length());
-            if (ID.equals(currID)) {
-                commitID = commit.getName();
-                break;
-            }
-        }
-        if (commitID == null) {
-            System.out.println("Warning:");
-            System.out.println("    No commit with that id exists.");
-            return;
-        }
-
-        // load the commit history
-        File fileToCheckout = new File(commitsDir,  commitID + "/" + fileName);
 
         if (!fileToCheckout.exists()) {
             System.out.println("Warning:");

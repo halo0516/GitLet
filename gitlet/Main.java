@@ -88,12 +88,6 @@ public class Main {
         } else {
             if (args[1].equals("--")) {
                 co.checkoutFile(args[2]);
-            } else {
-                if (args[2].equals("--")) {
-                    co.checkoutFile(args[1], args[3]);
-                } else {
-                    System.out.println("Incorrect operands.");
-                }
             }
         }
     }

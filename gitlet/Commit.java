@@ -11,8 +11,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- * Represents a gitlet commit object.
- * does at a high level.
+ * Represents a gitlet commit object, which is responsible for storing the metadata
+ * of a commit.
  *
  * @author Yuxiang Wang
  */

@@ -52,9 +52,10 @@ public class GitletTest {
         // Check if the test file is in the staging area
         File stagedFile = new File(gitDir, "stage/test.txt");
         assertTrue(stagedFile.exists());
+        stage.status();
 
         // Remove the test file from the staging area
-        (new Stage()).rm(testFile);
+        stage.rm(testFile);
 
         // Ensure the test file is removed from the staging area
         assertFalse(stagedFile.exists());

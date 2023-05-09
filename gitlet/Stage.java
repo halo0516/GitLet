@@ -149,36 +149,27 @@ public class Stage {
         }
         
         // If the file was being tracked, deletes from the working directory.
-        String head = ptr.get("HEAD");
-        String branch = ptr.get(head);
-        String commitHash = ptr.get(branch);
-        
-        File commit = new File(workingDirectory + "/.gitlet/commits/" + commitHash);
         File stage = new File(workingDirectory + "/.gitlet/stage/" + f.getName());
         
         if (tracked.contains(f.getName())) {
             tracked.remove(f.getName());
             removed.add(f.getName());
+
             File wd = new File(workingDirectory + "/" + f.getName());
             if (wd.exists()) {
                 wd.delete();
             }
+
             try {
                 new File(workingDirectory + "/.gitlet/remove/" + f.getName()).createNewFile();
             } catch (IOException e) {
                 System.out.println("File not moved to remove folder");
             }
             if (stage.exists()) {
-                if (!stage.delete()) {
-                    System.out.println("File not deleted from stage folder");
-                    return;
-                }
+                stage.delete();
             }
         } else if (!tracked.contains(f.getName()) && stage.exists()) {
-            if (stage.delete()) {
-                System.out.println("File not deleted from stage folder");
-                return;
-            }
+            stage.delete();
         } else if (!tracked.contains(f.getName()) && !stage.exists()) {
             System.out.println("No reason to remove the file.");
             return;
@@ -202,7 +193,10 @@ public class Stage {
             System.out.println("Map serialization failed.");
         }
     }
-    
+
+    /**
+     * Prints out the status of the current branch.
+     */
     public void status() {
         TreeMap<String, String> ptrs;
         

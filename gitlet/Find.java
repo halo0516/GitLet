@@ -5,7 +5,7 @@ import java.util.Objects;
 
 /**
  * Find class provides functionality for searching commits by their commit messages
- * in a Git-like version control system.
+ * in the Gitlet version control system.
  *
  * @author Lang Qin, Yuxiang Wang
  */

@@ -15,13 +15,20 @@ import java.util.TreeSet;
 /**
  * Represents a gitlet stage object, which is responsible for adding and removing files
  * that will be committed.
+ * instance variables include:
+ *      workingDirectory:   A File object representing the current working directory.
+ *      bPath:              A File object representing the path to the directory containing the branch files.
+ *      id:                 A TreeMap mapping file names to their corresponding hash IDs.
+ *      ptr:                A TreeMap mapping branch names to the hash ID of their corresponding head commits.
+ *      tracked:            A TreeSet containing the names of all files that are currently being tracked.
+ *      removed:            A TreeSet containing the names of all files that have been marked for removal.
  * Usage:
  * <p>
- *     java gitlet.Main add [filename]
- *     java gitlet.Main rm [filename]
+ *     java gitlet.Main add [filename] : Adds a file to the stage.
+ *     java gitlet.Main rm [filename] : Removes a file from the stage.
  * <p>
  *
- * @author Jiaying Hou, Lang Qin
+ * @author Jiaying Hou, Lang Qin, Yuxiang Wang
  */
 
 public class Stage {

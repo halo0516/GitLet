@@ -11,10 +11,18 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- * Represents a gitlet commit object, which is responsible for storing the metadata
- * of a commit.
  *
+ *Represents a gitlet commit object, which is responsible for storing the metadata
+ *of a commit.
+ *The class is responsible for creating and storing new commits to the repository and
+ *maintaining the tracked files and removed files list.
+ *The class also updates the pointers for the branches in the repository.
+ *The Commit object has a log message, timestamp, parent hash, set of staged files,
+ *set of removed files, set of tracked files and a TreeMap of pointers to branches in the
+ *repository.
+ *Implements Serializable interface to enable serialization of Commit objects.
  * @author Lang Qin, Jiaying Hou, Yuxiang Wang
+ *
  */
 
 public class Commit implements Serializable {

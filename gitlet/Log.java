@@ -9,7 +9,7 @@ import java.util.TreeMap;
 
 /**
  * Log class provides functionality for displaying commit logs in a Git-like version control system.
- * 
+ * It also provides methods for loading the head reference and updating the parent ID.
  * Usage:
  * <p>
  *     java gitlet.Main log

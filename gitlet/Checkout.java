@@ -7,6 +7,9 @@ import java.util.TreeMap;
 
 /**
  * Driver class to check out files from the commit history.
+ * The `Checkout` class provides methods to check out files from a Git commit.
+ * You can either check out a specific file from the head commit or from a specific commit,
+ * or check out a branch (which moves the HEAD pointer to the latest commit of that branch).
  * <p>
  *     Usage: java gitlet.Main checkout -- [file name]
  *     Usage: java gitlet.Main checkout [commit id] -- [file name]

@@ -48,6 +48,8 @@ public class GitletTest {
         // Add the test file to the staging area
         Stage stage = new Stage();
         stage.add(testFile);
+        Log log = new Log();
+        log.log();
 
         // Check if the test file is in the staging area
         File stagedFile = new File(gitDir, "stage/test.txt");
@@ -62,5 +64,8 @@ public class GitletTest {
 
         // Check the status of the Gitlet repository
         stage.status();
+
+        // global log
+        log.globalLog();
     }
 }

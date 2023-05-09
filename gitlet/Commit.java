@@ -14,7 +14,7 @@ import java.util.TreeSet;
  * Represents a gitlet commit object, which is responsible for storing the metadata
  * of a commit.
  *
- * @author Yuxiang Wang
+ * @author Lang Qin, Jiaying Hou, Yuxiang Wang
  */
 
 public class Commit implements Serializable {

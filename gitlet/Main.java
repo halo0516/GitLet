@@ -27,7 +27,7 @@ public class Main {
                 // TODO: handle the `add [filename]` command
                 break;
             case "global-log":
-                (new Log()).globallog();
+                (new Log()).globalLog();
                 break;
             case "log":
                 (new Log()).log();

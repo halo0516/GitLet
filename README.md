@@ -44,7 +44,6 @@ Saves a snapshot of tracked files in the current commit and staging area so they
 
 **Usage:**
 ```shell
-java gitlet.Main checkout -- [file name]
 java gitlet.Main checkout [commit id] -- [file name]
 java gitlet.Main checkout [branch name]
 ```
@@ -59,6 +58,7 @@ Takes all files in the commit at the head of the given branch, and puts them in 
 **Usage:** 
 ```shell
 java gitlet.Main log
+java gitlet.Main global-log
 ```
 
 **Description:** 
@@ -69,6 +69,7 @@ Starting at the current head commit, display information about each commit backw
 **Usage:** 
 ```shell
 java gitlet.Main branch [branch name]
+java gitlet.Main rm-branch [branch name]
 ```
 
 **Description:** 
@@ -81,9 +82,30 @@ Creates a new branch with the given name, and points it at the current head comm
 java gitlet.Main merge [branch name]
 ```
 
-**Description:** 
- 
+**Description:**
+
 Merges files from the given branch into the current branch.
+
+### 6. status
+**Usage:**
+```shell
+java gitlet.Main status
+```
+
+**Description:**
+
+Tell the user what branches currently exist, and marks the current branch with a *. Also tell the user what files have been staged or marked for untracking.
+
+### 7. add / remove
+**Usage:**
+```shell
+java gitlet.Main add [file name]
+java gitlet.Main rm [file name]
+```
+
+**Description:**
+
+Adds a copy of the file as it currently exists to the staging area. Untrack the file; that is, indicate (somewhere in the .gitlet directory) that it is not to be included in the next commit, even if it is tracked in the current commit (which will become the next commit’s parent).
 
 ## Explanation & Use of Class Material
 ### 1. Linear Data Structures

@@ -8,6 +8,10 @@ import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.TreeMap;
 
+/**
+ * Merge class is responsible for performing the merge operation in the gitlet version control system.
+ */
+
 public class Merge {
     String workDirectory = System.getProperty("user.dir");
     String stagingPath =   workDirectory + "/.gitlet/Staging Area";
@@ -20,7 +24,13 @@ public class Merge {
     String currBranchName = "";
     TreeMap<String, String> commitPointers;
 
-    public  void merge(String branchName) throws IOException {
+    /**
+     * Performs the merge operation for the given branch name.
+     *
+     * @param branchName the branch to be merged with the current branch
+     * @throws IOException if an I/O error occurs during the merge operation
+     */
+    public void merge(String branchName) throws IOException {
         //check for staging, if staging, cannot merge
         if(hasStagingFile()) {
             System.out.println("Cann't merge, please discard or commit the staging file");
@@ -96,7 +106,7 @@ public class Merge {
         new Commit(commitName, false).commit(false);
     }
 
-    private void  CategorizeFiles(String currCommitID, String splitCommitID,
+    private void CategorizeFiles(String currCommitID, String splitCommitID,
                                   HashSet<String> UnModifiedFile,
                                   HashSet<String> modifiedFile,
                                   HashSet<String> deletedFile) {
@@ -147,9 +157,6 @@ public class Merge {
         utilFileNames.add("parentHash.txt");
         return utilFileNames.contains(fileName);
     }
-
-
-
 
     private String getSplitPoint(String currBranchName, String branchName) {
         String splitKey = "";

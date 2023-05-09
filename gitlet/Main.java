@@ -12,7 +12,6 @@ public class Main {
     /** Usage: java gitlet.Main ARGS, where ARGS contains
      *  <COMMAND> <OPERAND1> <OPERAND2> ... 
      */
-    private static final String GITLET_DIR = ".gitlet/";
 
     public static void main(String[] args) throws IOException {
         if (!isValidInput(args)) {

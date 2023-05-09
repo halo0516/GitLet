@@ -12,10 +12,24 @@ import java.io.IOException;
 import java.util.TreeSet;
 
 /**
- * Reset class provides functionality for resetting the working directory
- * to a specific commit in a Git-like version control system.
- *
- * @author Lang Qin, Zitong Shi
+
+ Reset class provides functionality for resetting the working directory
+
+ to a specific commit in a Git-like version control system.
+
+ This class contains methods for resetting the working directory to a specified commit,
+
+ clearing the staging area, checking if the reset can be performed without conflicts,
+
+ deleting files from the current branch, copying files from the target commit, saving pointers
+
+ and loading pointers from disk.
+
+ It also contains constants for the paths of the commit directory, staging directory,
+
+ branch directory, and the current working directory.
+
+ @author Lang Qin, Zitong Shi
  */
 public class Reset {
     private static final File COMMIT_DIR

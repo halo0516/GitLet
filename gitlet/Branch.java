@@ -68,7 +68,9 @@ public class Branch {
                     new FileInputStream(filePath));
             commitPointers = (TreeMap<String, String>) objectInputStream.readObject();
             objectInputStream.close();
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
 

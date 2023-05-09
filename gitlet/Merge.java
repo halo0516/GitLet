@@ -1,197 +1,276 @@
 package gitlet;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.TreeMap;
 
 /**
- * Merge class is responsible for performing the merge operation in the gitlet
- * version control system.
- *
- * @author Zitong Shi
+ * A class that represents the merge operation in the Gitlet version control system.
  */
-
 public class Merge {
-    String workDirectory = System.getProperty("user.dir");
-    String stagingPath = workDirectory + "/.gitlet/stage";
-    String branchPath = workDirectory + "/.gitlet/branch";
-    String pointersPath = branchPath + "/pointers.txt";
-    String commitPath = branchPath + "/.gitlet/commit";
-    String splitCommitID = "";
-    String branchCommitID = "";
-    String currHeadCommitID = "";
-    String currBranchName = "";
-    TreeMap<String, String> commitPointers;
+    private static String branchCommitString;
+    private static String headCommitString;
+    private static String splitPointString;
+    private static File splitPointCommit;
+    private static File branchCommit;
+    private static File headCommit;
+    private static HashSet<String> headModifiedFiles = new HashSet<>();
+    private static HashSet<String> headUnmodifiedFiles = new HashSet<>();
+    private static HashSet<String> headDeletedFiles = new HashSet<>();
+    private static HashSet<String> branchModifiedFiles = new HashSet<>();
+    private static HashSet<String> branchUnmodifiedFiles = new HashSet<>();
+    private static HashSet<String> branchDeletedFiles = new HashSet<>();
+    private static boolean conflicting = false;
+    private static String head;
 
     /**
-     * Performs the merge operation for the given branch name.
+     * Merges a branch with the current branch.
      *
-     * @param branchName the branch to be merged with the current branch
-     * @throws IOException if an I/O error occurs during the merge operation
+     * @param branchName The name of the branch to be merged.
+     * @throws IOException If there is an I/O error during the merge operation.
      */
-    public void merge(String branchName) throws IOException {
-        //check for staging, if staging, cannot merge
-        if (hasStagingFile()) {
-            System.out.println("Cann't merge, please discard or commit " +
-                    "the staging file");
+    public static void merge(String branchName) throws IOException {
+
+        if (setUpVariables(branchName)) {
+            return;
+        }
+        setCommitsUp(branchName);
+        settingUpHashSets(branchName);
+
+        if (splitPointString.equals(branchCommitString)) {
+            System.out.println("Given branch is an ancestor of the current branch.");
+            return;
         }
 
-        //read in the commit map
-        commitPointers = getInput(pointersPath);
-
-        //find relevant commit
-        currBranchName = commitPointers.get("HEAD");
-        currHeadCommitID = commitPointers.get(currBranchName);
-        branchCommitID = commitPointers.get(branchName);
-        //findSplitCommit
-        splitCommitID = getSplitPoint(currBranchName, branchName);
-
-        //category files headBranch
-        HashSet<String> headUnModifiedFile = new HashSet<>();
-        HashSet<String> headModifiedFile = new HashSet<>();
-        HashSet<String> headDeleledFile = new HashSet<>();
-        categorizeFiles(currHeadCommitID, splitCommitID, headUnModifiedFile, headModifiedFile,
-                headDeleledFile);
-
-        //category files headBranch
-        HashSet<String> branchUnModifiedFile = new HashSet<>();
-        HashSet<String> branchModifiedFile = new HashSet<>();
-        HashSet<String> branchDeleledFile = new HashSet<>();
-        categorizeFiles(branchCommitID, splitCommitID, branchUnModifiedFile, branchModifiedFile,
-                branchDeleledFile);
-
-
-        String currCommitPath = commitPath + currHeadCommitID;
-        String splitCommitPath = commitPath + splitCommitID;
-        String branchCommit = commitPath + branchCommitID;
-
-        //Case1: only branch modified the file
-        for (String fileName: branchModifiedFile) {
-            if (!headUnModifiedFile.contains(fileName)) {
-                continue;
+        for (File file : splitPointCommit.listFiles()) {
+            if (!new File(headCommit + "/" + file.getName()).exists()) {
+                headDeletedFiles.add(file.getName());
             }
-            //replace the file in the wd to branch
-            Files.copy(new File(branchCommit + "/" + fileName).toPath(),
-                    new File(workDirectory + "/" + fileName).toPath());
-            // stage the file
-            Files.copy(new File(branchCommit + "/" + fileName).toPath(),
-                    new File(stagingPath + "/" + fileName).toPath());
+            if (!new File(branchCommit + "/" + file.getName()).exists()) {
+                branchDeletedFiles.add(file.getName());
+            }
         }
 
-        //Case2: only branch modified the file
-        File[] branchFiles = new File(commitPath + branchCommitID).listFiles();
-        for (File file: branchFiles) {
-            String fileName = file.getName();
-            File currFile = new File(currCommitPath + "/" + fileName);
-            File split = new File(splitCommitPath + "/" + fileName);
-            if (!currFile.exists() && !split.exists()) {
-                new Checkout().checkoutFile(fileName, branchCommitID);
+        for (String fileName : branchModifiedFiles) {
+            if (headUnmodifiedFiles.contains(fileName)) {
+                // change files in wd to given branch stuff
+                new File(System.getProperty("user.dir") + "/" + fileName).delete();
+                Files.copy(new File(branchCommit + "/" + fileName).toPath(),
+                        new File(System.getProperty("user.dir") + "/" + fileName).toPath());
                 // stage the file
                 Files.copy(new File(branchCommit + "/" + fileName).toPath(),
-                     new File(stagingPath + "/" + fileName).toPath());
+                        new File(System.getProperty("user.dir")
+                                + "/.gitlet/stage/" + fileName).toPath());
             }
         }
 
-         //case 3:in split and unmodified by curr but delete by branch
-        File[] splitFiles = new File(commitPath + splitCommitID).listFiles();
-        for (File file: splitFiles) {
-            if (headUnModifiedFile.contains(file.getName()) &&
-                !new File(branchCommit + "/" + file.getName()).exists()) {
-                //delete from the wd
-                new File(workDirectory + "/" + file.getName()).delete();
+        //any files that have been modified in currentbut not given branch since split
+        // should stay same.
+        //any files not present at split & present only in current branch should remain
+        // as they are.
+
+        //any files not present at split point and present only in given branch should be
+        // checked out and staged.
+        for (File file : branchCommit.listFiles()) {
+            if (!new File(splitPointCommit + "/" + file.getName()).exists()
+                    && !new File(headCommit + "/" + file.getName()).exists()) {
+                new Checkout().checkoutFile(branchCommitString, file.getName());
+                Files.copy(new File(branchCommit + "/" + file.getName()).toPath(),
+                        new File(System.getProperty("user.dir") + "/.gitlet/stage/" +
+                                file.getName()).toPath());
             }
         }
 
-        String commitName = "Megerd head with" + branchName;
-        new Commit(commitName, false).commit(false);
+        //any files present at the split point, unmodified in the current branch,
+        // and absent in the given branch should be removed (and untracked).
+
+        for (File file : splitPointCommit.listFiles()) {
+            if (headUnmodifiedFiles.contains(file.getName()) &&
+                    !new File(branchCommit + "/" + file.getName()).exists()) {
+                new File(System.getProperty("user.dir") + "/" + file.getName()).delete();
+            }
+        }
+
+        //any files modified in different ways are in conflict.
+        // first, loop through headCommit,
+        for (String fileName : headModifiedFiles) {
+            if (branchModifiedFiles.contains(fileName)) {
+                String headHashID = Utils.sha1(new String(Utils.readContents(new
+                        File(headCommit + "/" + fileName))));
+                String branchHashID = Utils.sha1(new String(Utils.readContents(new
+                        File(branchCommit + "/" + fileName))));
+                if (!headHashID.equals(branchHashID)) {
+                    conflicting = true;
+                    File hFile = new File(headCommit + "/" + fileName);
+                    File bFile = new File(branchCommit + "/" + fileName);
+                    File wdFile = new File(System.getProperty("user.dir") + "/" + fileName);
+                    String hFileContents = new String(Utils.readContents(hFile));
+                    String bFileContents = new String(Utils.readContents(bFile));
+                    FileOutputStream mergedFile = new FileOutputStream(wdFile, false);
+
+                    mergedFile.write("<<<<<<< HEAD".getBytes());
+                    mergedFile.write("\r\n".getBytes());
+                    mergedFile.write(hFileContents.getBytes());
+                    mergedFile.write("=======".getBytes());
+                    mergedFile.write("\r\n".getBytes());
+                    mergedFile.write(bFileContents.getBytes());
+                    mergedFile.write(">>>>>>>".getBytes());
+                    mergedFile.write("\r\n".getBytes());
+                    mergedFile.close();
+
+                }
+            }
+        }
+        for (String fileName : headModifiedFiles) {
+            if (branchDeletedFiles.contains(fileName)) {
+                conflicting = true;
+                File hFile = new File(headCommit + "/" + fileName);
+                File wdFile = new File(System.getProperty("user.dir") + "/" + fileName);
+                String hFileContents = new String(Utils.readContents(hFile));
+                FileOutputStream mergedFile = new FileOutputStream(wdFile, false);
+
+                mergedFile.write("<<<<<<< HEAD".getBytes());
+                mergedFile.write("\r\n".getBytes());
+                mergedFile.write(hFileContents.getBytes());
+                mergedFile.write("=======".getBytes());
+                mergedFile.write("\r\n".getBytes());
+                mergedFile.write(">>>>>>>".getBytes());
+                mergedFile.write("\r\n".getBytes());
+                mergedFile.close();
+            }
+        }
+        for (String fileName : branchModifiedFiles) {
+            if (headDeletedFiles.contains(fileName)) {
+                conflicting = true;
+                File bFile = new File(branchCommit + "/" + fileName);
+                File wdFile = new File(System.getProperty("user.dir") + "/" + fileName);
+                String bFileContents = new String(Utils.readContents(bFile));
+                FileOutputStream mergedFile = new FileOutputStream(wdFile, false);
+                mergedFile.write("<<<<<<< HEAD".getBytes());
+                mergedFile.write("\r\n".getBytes());
+                mergedFile.write("=======".getBytes());
+                mergedFile.write("\r\n".getBytes());
+                mergedFile.write(bFileContents.getBytes());
+                mergedFile.write(">>>>>>>".getBytes());
+                mergedFile.write("\r\n".getBytes());
+                mergedFile.close();
+            }
+        }
+
+        if (conflicting) {
+            System.out.println("Encountered a merge conflict.");
+        } else {
+            new Commit("Merged " + head + " with " + branchName + ".", false).commit(false);
+        }
+
     }
 
-    private void categorizeFiles(String currCommitID, String splitCommitID,
-                                  HashSet<String> unModifiedFile,
-                                  HashSet<String> modifiedFile,
-                                  HashSet<String> deletedFile) {
-
-        File[] currFiles = new File(commitPath + currCommitID).listFiles();
-        File[] splitPointFiles = new File(commitPath + splitCommitID).listFiles();
-
-        for (File currFile: currFiles) {
-            if (isUtilFile(currFile)) {
-                continue;
-            }
-
-            if (new File(commitPath + splitCommitID + "/" + currFile.getName()).exists()) {
-                File splitFile = new File(commitPath + splitCommitID + "/" + currFile.getName());
-                if (splitFile.exists()) {
-                    if (isSame(currFile, splitFile)) {
-                        unModifiedFile.add(currFile.getName());
+    static void settingUpHashSets(String branchName) {
+        // add files to headCommit modified & unmodified files arraylists. (adds new files too)
+        for (File file : headCommit.listFiles()) {
+            if (!file.getName().equals("logMessage.txt")
+                    && !file.getName().equals("timeStamp.txt")
+                    && !file.getName().equals("parentHash.txt")) {
+                if (new File(splitPointCommit + "/" + file.getName()).exists()) {
+                    String headHashID = Utils.sha1(new String(Utils.readContents(file)));
+                    String splitHashID = Utils.sha1(new
+                            String(Utils.readContents(
+                                    new File(splitPointCommit + "/" + file.getName()))));
+                    if (headHashID.equals(splitHashID)) {
+                        headUnmodifiedFiles.add(file.getName());
                     } else {
-                        modifiedFile.add(currFile.getName());
+                        headModifiedFiles.add(file.getName());
                     }
                 } else {
-                    modifiedFile.add(currFile.getName());
+                    headModifiedFiles.add(file.getName());
                 }
             }
         }
 
-        for (File splitFile: splitPointFiles) {
-            if (new File(commitPath + currCommitID + "/" + splitFile.getName()).exists()) {
-                continue;
-            } else {
-                deletedFile.add(splitFile.getName());
+        //add files to branchCommit modified & unmodified files arrayLists. (adds new files too)
+        for (File file : branchCommit.listFiles()) {
+            if (!file.getName().equals("logMessage.txt")
+                    && !file.getName().equals("timeStamp.txt")
+                    && !file.getName().equals("parentHash.txt")) {
+                if (new File(splitPointCommit + "/" + file.getName()).exists()) {
+                    String branchHashID = Utils.sha1(new String(Utils.readContents(file)));
+                    String splitHashID = Utils.sha1(new
+                            String(Utils.readContents(
+                                    new File(splitPointCommit + "/" + file.getName()))));
+                    if (branchHashID.equals(splitHashID)) {
+                        branchUnmodifiedFiles.add(file.getName());
+                    } else {
+                        branchModifiedFiles.add(file.getName());
+                    }
+                } else {
+                    branchModifiedFiles.add(file.getName());
+                }
             }
         }
     }
 
-    private boolean isSame(File currFile, File splitFile) {
-        String currHashID = Utils.sha1(new String(Utils.readContents(currFile)));
-        String splitHashID = Utils.sha1(new String(Utils.readContents(splitFile)));
-
-        return currHashID.equals(splitHashID);
-    }
-
-    private boolean isUtilFile(File file) {
-        String fileName = file.getName();
-        HashSet<String> utilFileNames = new HashSet<>();
-        utilFileNames.add("logMessage.txt");
-        utilFileNames.add("timeStamp.txt");
-        utilFileNames.add("parentHash.txt");
-        return utilFileNames.contains(fileName);
-    }
-
-    private String getSplitPoint(String currBranchName, String branchName) {
-        String splitKey = "";
-        if (currBranchName.compareTo(branchName) < 0) {
-            splitKey = currBranchName + "/" + branchName;
-        } else {
-            splitKey = branchName + "/" + currBranchName;
+    static boolean setUpVariables(String branchName) {
+        if (new File(System.getProperty("user.dir") + "/.gitlet/stage").listFiles().length != 0) {
+            System.out.println("You have uncommitted changes.");
+            return true;
         }
 
-        return commitPointers.get(splitKey);
-    }
+        TreeMap<String, String> pointers = new TreeMap<>();
 
-    private boolean hasStagingFile() {
-        File[] stagingFile = new File(stagingPath).listFiles();
-        return stagingFile.length > 0;
-    }
+        String pointerPath = System.getProperty("user.dir") + "/.gitlet/branch/pointers.txt";
+        try {
+            ObjectInputStream inp = new ObjectInputStream(new FileInputStream(pointerPath));
+            pointers = (TreeMap) inp.readObject();
+            inp.close();
+        } catch (IOException | ClassNotFoundException excp) {
+            pointers = new TreeMap<>();
+        }
 
-    public TreeMap<String, String> getInput(String filePath) {
-        TreeMap<String, String> commitPointers = new TreeMap<>();
+        head = pointers.get("HEAD");
+        headCommitString = pointers.get(head);
+
+        if (pointers.containsKey(branchName)) {
+            branchCommitString = pointers.get(branchName);
+        } else {
+            System.out.println("A branch with that name does not exist.");
+            return true;
+        }
+
+        if (branchName.equals(head)) {
+            System.out.println("Cannot merge a branch with itself.");
+            return true;
+        }
+
+        if (branchName.compareTo(head) > 0) {
+            splitPointString = pointers.get(head + "/" + branchName);
+        } else {
+            splitPointString = pointers.get(branchName + "/" + head);
+        }
+
+
+        if (splitPointString.equals(headCommitString)) {
+            pointers.replace(head, branchCommitString);
+            System.out.println("Current branch fast-forwarded.");
+            return true;
+        }
 
         try {
-            ObjectInputStream objectInputStream =
-                    new ObjectInputStream(new FileInputStream(filePath));
-            commitPointers = (TreeMap<String, String>) objectInputStream.readObject();
-            objectInputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(pointerPath));
+            out.writeObject(pointers);
+            out.close();
+        } catch (IOException excp) {
+            System.out.print("Map serialization failed.");
         }
+        return false;
+    }
 
-        return  commitPointers;
+    static void setCommitsUp(String branchName) {
+        splitPointCommit = new File(
+                System.getProperty("user.dir") + "/.gitlet/commit/" + splitPointString);
+        headCommit = new File(System.getProperty("user.dir") +
+                "/.gitlet/commit/" + headCommitString);
+        branchCommit = new File(System.getProperty("user.dir") +
+                "/.gitlet/commit/" + branchCommitString);
     }
 }

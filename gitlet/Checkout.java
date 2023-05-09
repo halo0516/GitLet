@@ -195,7 +195,7 @@ public class Checkout {
         for (File f : Objects.requireNonNull(newBranchDir.listFiles())) {
             // check if the file is tracked in the current branch
             if (!(new File(currBranchDir, f.getName())).exists()
-                    && (new File(WORKING_DIR, f.getName())).exists()) {
+                && (new File(WORKING_DIR, f.getName())).exists()) {
                 System.out.println("Warning:");
                 System.out.println("    There is an "
                         + "untracked file: "  + f.getName() + "; delete it or add it first.");

@@ -13,8 +13,13 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- * Represents a gitlet stage object.
- * does at a high level.
+ * Represents a gitlet stage object, which is responsible for adding and removing files
+ * that will be committed.
+ * Usage:
+ * <p>
+ *     java gitlet.Main add [filename]
+ *     java gitlet.Main rm [filename]
+ * <p>
  *
  * @author Jiaying Hou
  */

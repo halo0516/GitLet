@@ -1,10 +1,11 @@
 package gitlet;
 
+import java.io.File;
 import java.io.IOException;
 
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
- *  @author TODO
+ *  @author Lang Qin
  */
 public class Main {
 
@@ -19,28 +20,18 @@ public class Main {
         }
 
         String firstArg = args[0];
-        switch(firstArg) {
-            case "init":
-                (new Init()).init();
-                break;
-            case "add":
-                // TODO: handle the `add [filename]` command
-                break;
-            case "global-log":
-                (new Log()).globalLog();
-                break;
-            case "log":
-                (new Log()).log();
-                break;
-            case "find":
-                find(args);
-                break;
-            case "commit":
-                commit(args);
-                break;
-            case "checkout":
-                checkout(args);
-                break;
+        switch (firstArg) {
+            case "init" -> (new Init()).init();
+            case "add" -> (new Stage()).add(new File(args[1]));
+            case "global-log" -> (new Log()).globalLog();
+            case "log" -> (new Log()).log();
+            case "find" -> find(args);
+            case "commit" -> commit(args);
+            case "checkout" -> checkout(args);
+            case "branch" -> (new Branch()).branch(args[1]);
+            case "rm-branch" -> (new Branch()).rmBranch(args[1]);
+            case "reset" -> (new Reset()).reset(args[1]);
+            default -> {}
         }
     }
 

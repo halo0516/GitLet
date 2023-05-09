@@ -8,8 +8,21 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+/**
+ * Represents a gitlet stage object, which is responsible for adding and removing files
+ * that will be committed.
+ * Usage:
+ * <p>
+ *     java gitlet.Main add [filename]
+ *     java gitlet.Main rm [filename]
+ * <p>
+ *
+ * @author Jiaying Hou, Lang Qin
+ */
 
 public class Stage {
     
@@ -19,11 +32,16 @@ public class Stage {
     TreeMap<String, String> ptr = new TreeMap<>();
     TreeSet<String> tracked = new TreeSet<>();
     TreeSet<String> removed = new TreeSet<>();
-    
+
+    /**
+     * Add a file to the stage.
+     *
+     * @param f The file to be added.
+     */
     public void add(File f) {
         try {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(bPath + "/ID.txt"));
-            id = (TreeMap) ois.readObject();
+            id = (TreeMap<String, String>) ois.readObject();
             ois.close();
         } catch (IOException | ClassNotFoundException e) {
             id = new TreeMap<>();
@@ -32,7 +50,7 @@ public class Stage {
         try {
             ObjectInputStream ois = new ObjectInputStream(
                     new FileInputStream(bPath + "/removeMark" + ptr.get("HEAD") + ".txt"));
-            removed = (TreeSet) ois.readObject();
+            removed = (TreeSet<String>) ois.readObject();
             ois.close();
         } catch (IOException | ClassNotFoundException e) {
             removed = new TreeSet<>();
@@ -71,9 +89,7 @@ public class Stage {
                 } catch (IOException e) {
                     return;
                 }
-                if (removed.contains(name)) {
-                    removed.remove(name);
-                }
+                removed.remove(name);
             }
         }
         
@@ -94,9 +110,13 @@ public class Stage {
         } catch (IOException e) {
             System.out.println("Map serialization failed.");
         }
-        
     }
-    
+
+    /**
+     * Remove a file from the stage.
+     *
+     * @param f The file to be removed.
+     */
     public void rm(File f) {
         // Try to access the HEAD key in the ptr map by the key HEAD,
         // which gives the value as the corresponding branch;
@@ -104,7 +124,7 @@ public class Stage {
         try {
             ObjectInputStream ois = new ObjectInputStream(
                     new FileInputStream(bPath + "/pointers.txt"));
-            ptr = (TreeMap) ois.readObject();
+            ptr = (TreeMap<String, String>) ois.readObject();
             ois.close();
         } catch (IOException | ClassNotFoundException e) {
             ptr = new TreeMap<>();
@@ -113,7 +133,7 @@ public class Stage {
         try {
             ObjectInputStream ois = new ObjectInputStream(
                     new FileInputStream(bPath + "/tracked.txt"));
-            tracked = (TreeSet) ois.readObject();
+            tracked = (TreeSet<String>) ois.readObject();
             ois.close();
         } catch (IOException | ClassNotFoundException e) {
             tracked = new TreeSet<>();
@@ -122,27 +142,24 @@ public class Stage {
         try {
             ObjectInputStream ois = new ObjectInputStream(
                     new FileInputStream(bPath + "/removeMark" + ptr.get("HEAD") + ".txt"));
-            tracked = (TreeSet) ois.readObject();
+            tracked = (TreeSet<String>) ois.readObject();
             ois.close();
         } catch (IOException | ClassNotFoundException e) {
             removed = new TreeSet<>();
         }
         
         // If the file was being tracked, deletes from the working directory.
-        String head = ptr.get("HEAD");
-        String branch = ptr.get(head);
-        String commitHash = ptr.get(branch);
-        
-        File commit = new File(workingDirectory + "/.gitlet/commits/" + commitHash);
         File stage = new File(workingDirectory + "/.gitlet/stage/" + f.getName());
         
         if (tracked.contains(f.getName())) {
             tracked.remove(f.getName());
             removed.add(f.getName());
+
             File wd = new File(workingDirectory + "/" + f.getName());
             if (wd.exists()) {
                 wd.delete();
             }
+
             try {
                 new File(workingDirectory + "/.gitlet/remove/" + f.getName()).createNewFile();
             } catch (IOException e) {
@@ -176,14 +193,17 @@ public class Stage {
             System.out.println("Map serialization failed.");
         }
     }
-    
+
+    /**
+     * Prints out the status of the current branch.
+     */
     public void status() {
         TreeMap<String, String> ptrs;
         
         try {
             ObjectInputStream ois = new ObjectInputStream(
                     new FileInputStream(bPath + "/pointers.txt"));
-            ptrs = (TreeMap) ois.readObject();
+            ptrs = (TreeMap<String, String>) ois.readObject();
             ois.close();
         } catch (IOException | ClassNotFoundException e) {
             ptrs = new TreeMap<>();
@@ -201,14 +221,14 @@ public class Stage {
         
         File staged = new File(workingDirectory + "/.gitlet/stage");
         System.out.println("====== Staged Files ======");
-        for (File file : staged.listFiles()) {
+        for (File file : Objects.requireNonNull(staged.listFiles())) {
             System.out.println(file.getName());
         }
         System.out.println("\n");
         
         File rmvd = new File(workingDirectory + "/.gitlet/remove");
         System.out.println("====== Removed Files ======");
-        for (File file : rmvd.listFiles()) {
+        for (File file : Objects.requireNonNull(rmvd.listFiles())) {
             System.out.println(file.getName());
         }
         System.out.println("\n");

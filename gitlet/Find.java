@@ -1,32 +1,49 @@
 package gitlet;
-import java.io.*;
 
+import java.io.File;
+import java.util.Objects;
+
+/**
+ * Find class provides functionality for searching commits by their commit messages
+ * in a Git-like version control system.
+ *
+ * @author Lang Qin, Yuxiang Wang
+ */
 public class Find {
-    String logMsg;
-    String msg;
-    boolean track;
-    static File commitPath = new File(System.getProperty("user.dir") + "/.gitlet/Commits");
-    public void find(String msg) {
-        // Assign the input parameter to the instance variable msg
-        this.msg = msg;
-        // Set track to false by default
-        track = false;
-        // If the log message matches the input message
-        if (commitPath.listFiles() != null) {
-            for (File f : commitPath.listFiles()) {
-                logMsg = new String(Utils.readContents(
-                    new File(commitPath + "/" + f.getName() + "logMessage.txt")));
-                // If the log message matches the input message
-                if (logMsg.equals(msg)) {
-                    track = true;
+    private static final File COMMIT_DIR = new File(System.getProperty("user.dir") + "/.gitlet/Commits");
+
+    /**
+     * Searches for and displays the commit IDs with the given commit message.
+     *
+     * @param message the commit message to search for
+     */
+    public void find(String message) {
+        boolean tracker = false;
+
+        if (COMMIT_DIR.listFiles() != null) {
+            for (File f : Objects.requireNonNull(COMMIT_DIR.listFiles())) {
+                String logmsg = readLogMessage(f.getName());
+
+                if (logmsg.equals(message)) {
+                    tracker = true;
                     System.out.println(f.getName());
                 }
             }
 
-            // If track is still false, meaning no matching commit was found
-            if (!track) {
-                System.out.println("There exist no commit with that message.");
+            if (!tracker) {
+                System.out.println("Found no commit with that message.");
             }
         }
+    }
+
+    /**
+     * Reads the log message of a commit with the given commit ID.
+     *
+     * @param commitID the ID of the commit to read the log message from
+     * @return the log message of the commit
+     */
+    private String readLogMessage(String commitID) {
+        return new String(Utils.readContents(
+                new File(COMMIT_DIR + "/" + commitID + "/logMessage.txt")));
     }
 }

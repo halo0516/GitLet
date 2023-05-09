@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Driver class to initialize Gitlet, the tiny stupid version-control system.
@@ -20,7 +21,7 @@ import java.io.File;
 
 public class Init {
 
-    public void init() {
+    public void init() throws IOException {
         File workingDir = new File(System.getProperty("user.dir"));
         File gitDir = new File(workingDir, ".gitlet");
 
@@ -116,6 +117,8 @@ public class Init {
             System.out.println("    Could not create remove directory.");
             cleanUp();
         }
+
+        InitialCommit iC = new InitialCommit();
     }
 
     /**
@@ -125,5 +128,12 @@ public class Init {
         File workingDir = new File(System.getProperty("user.dir"));
         File gitDir = new File(workingDir, ".gitlet");
         Utils.deleteDirectory(gitDir);
+    }
+
+    private static class InitialCommit extends Commit {
+        public InitialCommit() throws IOException {
+            super("initial commit", true);
+            this.commit(true);
+        }
     }
 }

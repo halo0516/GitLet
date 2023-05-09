@@ -1,90 +1,98 @@
 package gitlet;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.Objects;
+import java.util.TreeMap;
 
+/**
+ * Log class provides functionality for displaying commit logs in a Git-like version control system.
+ * 
+ * Usage:
+ * <p>
+ *     java gitlet.Main log
+ *     java gitlet.Main global-log
+ * </p>
+ * 
+ * @author Lang Qin, Yuxiang Wang
+ */
 public class Log {
-    static File commitPath = new File(System.getProperty("user.dir") + "/.gitlet/commits");
-    static File ptrPath = new File(System.getProperty("user.dir") + "/.gitlet/branch/pointers.txt");
-    TreeMap<String, String> ptrs;
-    String currentBranch;
-    String currentCommit;
-    String parentID;
-    String commitFile;
-    String logMsg;
-    String timeStamp;
+    private static final File cPath = new File(System.getProperty("user.dir") + "/.gitlet/commits");
+    private static final File headPath = new File(System.getProperty("user.dir")
+            + "/.gitlet/branch/pointers.txt");
 
+    private TreeMap<String, String> head;
+    private String currentCommit;
+    private String parentID;
+
+    /**
+     * Displays the commit log for the current branch.
+     */
     public void log() {
-        // If the Commit directory exists and is not empty, proceed
-        if (commitPath.listFiles() != null) {
-            try {
-                // Load the pointers map from the HEAD pointer file
-                FileInputStream input = new FileInputStream(ptrPath);
-                ObjectInputStream objInput = new ObjectInputStream(input);
-                this.ptrs = (TreeMap) objInput.readObject();
-                input.close();
-                objInput.close();
-            } catch (IOException | ClassNotFoundException e) {
-                return;
-            }
+        if (cPath.listFiles() != null) {
+            loadHead();
 
-            // Get the current branch and commit ID from the pointers map
-            this.currentBranch = ptrs.get("HEAD");
-            this.currentCommit = ptrs.get(currentBranch);
+            String currentBranch = head.get("HEAD");
+            currentCommit = head.get(currentBranch);
 
-            // Load the parent commit ID from the parentHash.txt file of the current commit
-            File optPath = new File(commitPath + "/" + currentCommit + "/parentHash.txt");
-            if (optPath.exists()) {
-                this.parentID = new String(Utils.readContents(optPath));
-            }
-
-            // Loop through the parent commits and print out their information
-            while (optPath.exists()) {
-                this.logMsg = new String(Utils.readContents(
-                    new File(commitPath + "/" + currentCommit + "/logMsg.txt")));
-                this.timeStamp = new String(Utils.readContents(
-                    new File(commitPath + "/" + currentCommit + "/timeStamp.txt")));
-                System.out.println("=============");
-                System.out.println("Commit: " + currentCommit);
-                System.out.println("TimeStamp: " + timeStamp);
-                System.out.println("Log Message: " + logMsg);
-                System.out.println();
-
-                // Update the current commit ID to the parent commit ID
+            while (new File(cPath + "/" + currentCommit + "/parentHash.txt").exists()) {
+                displayCommitInfo();
                 currentCommit = parentID;
-                if (optPath.exists()) {
-                    parentID = new String(Utils.readContents(optPath));
-                }
+                updateParentID();
             }
 
-            this.logMsg = new String(Utils.readContents(
-                new File(commitFile + "/" + currentCommit + "/logMsg.txt")));
-            this.timeStamp = new String(Utils.readContents(
-                new File(commitFile + "/" + currentCommit + "/timeStamp.txt")));
-            System.out.println("=============");
-            System.out.println("Commit: " + currentCommit);
-            System.out.println("TimeStamp: " + timeStamp);
-            System.out.println("Log Message: " + logMsg);
-            System.out.println();
+            displayCommitInfo();
         }
     }
-    public void globallog() {
-        // If the Commit directory exists and is not empty, proceed
-        if (commitPath.listFiles() != null) {
-            // Loop through all the commit directories and print out their information
-            for (File commit : commitPath.listFiles()) {
-                this.logMsg = new String(Utils.readContents(
-                    new File(commit + "/logMsg.txt")));
-                this.timeStamp = new String(Utils.readContents(
-                    new File(commit + "/timeStamp.txt")));
-                System.out.println("=============");
-                System.out.println("Commit: " + commit.getName());
-                System.out.println("TimeStamp: " + timeStamp);
-                System.out.println("Log Message: " + logMsg);
-                System.out.println();
+
+    /**
+     * Displays the commit log for all branches.
+     */
+    public void globalLog() {
+        if (cPath.listFiles() != null) {
+            for (File f : Objects.requireNonNull(cPath.listFiles())) {
+                currentCommit = f.getName();
+                displayCommitInfo();
             }
         }
     }
 
+    /**
+     * Loads the head reference from the serialized file.
+     */
+    private void loadHead() {
+        try (FileInputStream fileIn = new FileInputStream(headPath);
+             ObjectInputStream inp = new ObjectInputStream(fileIn)) {
+            this.head = (TreeMap<String, String>) inp.readObject();
+        } catch (IOException | ClassNotFoundException excp) {
+            return;
+        }
+    }
 
+    /**
+     * Updates the parentID from the currentCommit.
+     */
+    private void updateParentID() {
+        if (new File(cPath + "/" + currentCommit + "/parentHash.txt").exists()) {
+            parentID = new String(Utils.readContents(
+                    new File(cPath + "/" + currentCommit + "/parentHash.txt")));
+        }
+    }
+
+    /**
+     * Displays commit information for the currentCommit.
+     */
+    private void displayCommitInfo() {
+        String logmsg = new String(Utils.readContents(new File(cPath
+                + "/" + currentCommit + "/logMessage.txt")));
+        String timestamp = new String(Utils.readContents(new File(cPath
+                + "/" + currentCommit + "/timeStamp.txt")));
+        System.out.println("===");
+        System.out.println("Commit " + currentCommit);
+        System.out.println(timestamp);
+        System.out.println(logmsg);
+        System.out.println();
+    }
 }

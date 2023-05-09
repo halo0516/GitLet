@@ -17,11 +17,15 @@ import java.util.TreeSet;
  * that will be committed.
  * instance variables include:
  *      workingDirectory:   A File object representing the current working directory.
- *      bPath:              A File object representing the path to the directory containing the branch files.
+ *      bPath:              A File object representing the path to the directory
+ *                          containing the branch files.
  *      id:                 A TreeMap mapping file names to their corresponding hash IDs.
- *      ptr:                A TreeMap mapping branch names to the hash ID of their corresponding head commits.
- *      tracked:            A TreeSet containing the names of all files that are currently being tracked.
- *      removed:            A TreeSet containing the names of all files that have been marked for removal.
+ *      ptr:                A TreeMap mapping branch names to the hash ID
+ *                          of their corresponding head commits.
+ *      tracked:            A TreeSet containing the names of all files
+ *                          that are currently being tracked.
+ *      removed:            A TreeSet containing the names of all files
+ *                          that have been marked for removal.
  * Usage:
  * <p>
  *     java gitlet.Main add [filename] : Adds a file to the stage.

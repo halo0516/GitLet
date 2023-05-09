@@ -1,17 +1,11 @@
 package gitlet;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.TreeMap;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class LocalTest {
 

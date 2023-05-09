@@ -11,7 +11,7 @@ import java.util.TreeMap;
 
 public class Branch {
     String currentDirectory = System.getProperty("user.dir");
-    String serializablePath = currentDirectory + "/.gitlet/Serialized";
+    String serializablePath = currentDirectory + "/.gitlet/branch";
     String head = "HEAD";
     String pointersPath = serializablePath +"/pointers.txt";
 
@@ -65,7 +65,7 @@ public class Branch {
 
         try {
             ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(filePath));
-            commitPointers = (TreeMap<String, String>)  objectInputStream.readObject();
+            commitPointers = (TreeMap<String, String>) objectInputStream.readObject();
             objectInputStream.close();
         } catch (IOException e) {
             e.printStackTrace();

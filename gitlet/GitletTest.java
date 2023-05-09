@@ -6,9 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -75,5 +78,85 @@ public class GitletTest {
 
         // global log
         log.globalLog();
+    }
+
+    @Test
+    public void testCheckoutFile() throws IOException {
+        // Initialize Gitlet and create a commit
+        Init init = new Init();
+        init.init();
+
+        // Add test file and commit
+        Stage stage = new Stage();
+        stage.add(testFile);
+        Commit commit = new Commit("Initial commit", true);
+        commit.commit(false);
+
+        // Use the Checkout class to check out the test file
+        Checkout checkout = new Checkout();
+        checkout.checkoutFile(testFile.getName());
+    }
+
+    @Test
+    public void testBranch() throws IOException {
+        // Initialize Gitlet and create a commit
+        Init init = new Init();
+        init.init();
+
+        // Add test file and commit
+        Stage stage = new Stage();
+        stage.add(testFile);
+        Commit commit = new Commit("Initial commit", true);
+        commit.commit(true);
+
+        // Create a new branch
+        Branch branch = new Branch();
+        branch.branch("new_branch");
+
+        // Check if the new branch was created successfully
+        File branchPointersFile = new File(System.getProperty("user.dir") + "/.gitlet/branch/pointers.txt");
+        try {
+            FileInputStream fis = new FileInputStream(branchPointersFile);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            TreeMap<String, String> commitPointers = (TreeMap<String, String>) ois.readObject();
+            assertTrue(commitPointers.containsKey("new_branch"));
+            ois.close();
+            fis.close();
+        } catch (IOException | ClassNotFoundException e) {
+            fail("Failed to read branch pointers");
+        }
+    }
+
+    @Test
+    public void testRmBranch() throws IOException {
+        // Initialize Gitlet and create a commit
+        Init init = new Init();
+        init.init();
+
+        // Add test file and commit
+        Stage stage = new Stage();
+        stage.add(testFile);
+        Commit commit = new Commit("Initial commit", true);
+        commit.commit(true);
+
+        // Create a new branch
+        Branch branch = new Branch();
+        branch.branch("new_branch");
+
+        // Remove the new branch
+        branch.rmBranch("new_branch");
+
+        // Check if the new branch was removed successfully
+        File branchPointersFile = new File(System.getProperty("user.dir") + "/.gitlet/branch/pointers.txt");
+        try {
+            FileInputStream fis = new FileInputStream(branchPointersFile);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            TreeMap<String, String> commitPointers = (TreeMap<String, String>) ois.readObject();
+            assertFalse(commitPointers.containsKey("new_branch"));
+            ois.close();
+            fis.close();
+        } catch (IOException | ClassNotFoundException e) {
+            fail("Failed to read branch pointers");
+        }
     }
 }

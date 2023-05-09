@@ -36,6 +36,71 @@ public class GitletTest {
     }
 
     @Test
+    public void testMain() throws IOException {
+        Main.main("init".split(" "));
+        Main.main("branch other".split(" "));
+        Main.main("add hello2.txt".split(" "));
+        Main.main("add hello3.txt".split(" "));
+        Main.main("commit first".split(" "));
+        Main.main("status".split(" "));
+        Main.main("checkout master".split(" "));
+        Main.main("checkout other".split(" "));
+
+        Main.main("init".split(" "));
+        Main.main("branch other".split(" "));
+        Main.main("add hello2.txt".split(" "));
+        Main.main("add hello3.txt".split(" "));
+        Main.main("add hello4.txt".split(" "));
+        Main.main("commit hello".split(" "));
+        Main.main("rm hello2.txt".split(" "));
+        Main.main("status".split(" "));
+
+        // checkout tests
+        Main.main("init".split(" "));
+        Main.main("branch other".split(" "));
+        Main.main("add hello2.txt".split(" "));
+        Main.main("add hello3.txt".split(" "));
+        Main.main("add hello4.txt".split(" "));
+        Main.main("status".split(" "));
+        Main.main("commit first".split(" "));
+
+        Main.main("checkout other".split(" "));
+        Main.main("rm hello2.txt".split(" "));
+        Main.main("status".split(" "));
+        Main.main("commit hello2.txt".split(" "));
+    }
+
+    @Test
+    public void testCheckout() throws IOException {
+        write("test.txt", "This is a test file.");
+        write("test2.txt", "This is a test file 2.");
+
+        Main.main("init".split(" "));
+        Main.main("add test.txt".split(" "));
+        Main.main("add test2.txt".split(" "));
+        Main.main("commit first".split(" "));
+        Main.main("status".split(" "));
+        Main.main("log".split(" "));
+
+        Main.main("branch other".split(" "));
+        Main.main("branch other2".split(" "));
+        Main.main("checkout other".split(" "));
+        write("test3.txt", "This is a test file 3.");
+        Main.main("add test3.txt".split(" "));
+        Main.main("commit second".split(" "));
+
+        Main.main("checkout master".split(" "));
+        Main.main("status".split(" "));
+
+    }
+
+
+    private void write(String filename, String contents) throws IOException {
+        File file = new File(tempDir.toFile(), filename);
+        Files.write(file.toPath(), contents.getBytes());
+    }
+
+    @Test
     public void testIntiAndStage() throws IOException {
         // Initialize the Gitlet version control system
         Init init = new Init();

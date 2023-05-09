@@ -9,6 +9,7 @@ import java.util.TreeMap;
  * Driver class to check out files from the commit history.
  * <p>
  *     Usage: java gitlet.Main checkout -- [file name]
+ *     Usage: java gitlet.Main checkout [commit id] -- [file name]
  *     Usage: java gitlet.Main checkout [branch name]
  * </p>
  * @author Lang Qin
@@ -16,9 +17,9 @@ import java.util.TreeMap;
 
 public class Checkout {
 
-    private static final File workingDir = new File(System.getProperty("user.dir"));
-    private static final File commitsDir = new File(workingDir, ".gitlet/commits");
-    private static final File branchDir = new File(workingDir, ".gitlet/branch");
+    private static final File WORKING_DIR = new File(System.getProperty("user.dir"));
+    private static final File COMMITS_DIR = new File(WORKING_DIR, ".gitlet/commits");
+    private static final File BRANCH_DIR = new File(WORKING_DIR, ".gitlet/branch");
 
 
     /**
@@ -35,7 +36,7 @@ public class Checkout {
         TreeMap<String, String> branchHistory;
         try {
             ObjectInputStream in = new ObjectInputStream(
-                    new FileInputStream(new File(branchDir, "pointers.txt")));
+                    new FileInputStream(new File(BRANCH_DIR, "pointers.txt")));
             branchHistory = (TreeMap<String, String>) in.readObject();
             in.close();
         } catch (IOException | ClassNotFoundException e) {
@@ -44,7 +45,7 @@ public class Checkout {
 
         // load the commit history
         String currBranch = branchHistory.get(branchHistory.get("HEAD"));
-        File fileToCheckout = new File(commitsDir,  currBranch + "/" + fileName);
+        File fileToCheckout = new File(COMMITS_DIR,  currBranch + "/" + fileName);
 
         if (!fileToCheckout.exists()) {
             System.out.println("Warning:");
@@ -53,7 +54,7 @@ public class Checkout {
         }
 
         // set the file to the version in the head commit
-        File fileInWorkingDir = new File(workingDir, fileToCheckout.getName());
+        File fileInWorkingDir = new File(WORKING_DIR, fileToCheckout.getName());
 
         if (fileInWorkingDir.exists()) {
             if (!fileInWorkingDir.delete()) {
@@ -64,7 +65,71 @@ public class Checkout {
         }
 
         try {
-            Files.copy(fileToCheckout.toPath(), (new File(workingDir, fileName)).toPath());
+            Files.copy(fileToCheckout.toPath(), (new File(WORKING_DIR, fileName)).toPath());
+        } catch (IOException e) {
+            System.out.println("Error:");
+            System.out.println("    Could not copy file to working directory.");
+        }
+    }
+
+
+    /**
+     * Takes version of the file as it exists in the commit
+     * within the given id, and puts it in the working directory,
+     * overwriting the version of the file that's already there if
+     * there is one. The new version of the file is not staged.
+     * <p>
+     * Usage: Usage: java gitlet.Main checkout [commit id] -- [file name]
+     */
+    public void checkoutFile(String fileName, String id) {
+        // load the branch history
+        TreeMap<String, String> branchHistory;
+        try {
+            ObjectInputStream in = new ObjectInputStream(
+                    new FileInputStream(new File(BRANCH_DIR, "pointers.txt")));
+            branchHistory = (TreeMap<String, String>) in.readObject();
+            in.close();
+        } catch (IOException | ClassNotFoundException e) {
+            branchHistory = new TreeMap<>();
+        }
+
+        // find the commit with the given ID
+        String commitID = null;
+        for (File commit : Objects.requireNonNull(COMMITS_DIR.listFiles())) {
+            String currID = commit.getName().substring(0, id.length());
+            if (id.equals(currID)) {
+                commitID = commit.getName();
+                break;
+            }
+        }
+        if (commitID == null) {
+            System.out.println("Warning:");
+            System.out.println("    No commit with that id exists.");
+            return;
+        }
+
+        // load the commit history
+        File fileToCheckout = new File(COMMITS_DIR,  commitID + "/" + fileName);
+
+        if (!fileToCheckout.exists()) {
+            System.out.println("Warning:");
+            System.out.println("    File does not exist in that commit.");
+            return;
+        }
+
+        // set the file to the version in the head commit
+        File fileInWorkingDir = new File(WORKING_DIR, fileToCheckout.getName());
+
+        if (fileInWorkingDir.exists()) {
+            if (!fileInWorkingDir.delete()) {
+                System.out.println("Error:");
+                System.out.println("    Could not delete file in working directory.");
+                return;
+            }
+        }
+
+        try {
+            Files.copy(fileToCheckout.toPath(), (new File(WORKING_DIR, fileName)).toPath());
         } catch (IOException e) {
             System.out.println("Error:");
             System.out.println("    Could not copy file to working directory.");
@@ -91,7 +156,7 @@ public class Checkout {
         TreeMap<String, String> branchHistory;
         try {
             ObjectInputStream in = new ObjectInputStream(
-                    new FileInputStream(new File(branchDir, "pointers.txt")));
+                    new FileInputStream(new File(BRANCH_DIR, "pointers.txt")));
             branchHistory = (TreeMap<String, String>) in.readObject();
             in.close();
         } catch (IOException | ClassNotFoundException e) {
@@ -116,28 +181,30 @@ public class Checkout {
         if (!branchHistory.get("HEAD").equals(currBranch)) {
             if (!branchHistory.get("HEAD").equals(newBranch)) {
                 System.out.println("Warning:");
-                System.out.println("    There is an untracked file in the way; delete it or add it first.");
+                System.out.println("    There is an "
+                        + "untracked file in the way; delete it or add it first.");
                 return;
             }
         }
 
         // load the commit history
-        File newBranchDir = new File(commitsDir, newBranch);
-        File currBranchDir = new File(commitsDir, currBranch);
+        File newBranchDir = new File(COMMITS_DIR, newBranch);
+        File currBranchDir = new File(COMMITS_DIR, currBranch);
 
         // process the files in the target branch
         for (File f : Objects.requireNonNull(newBranchDir.listFiles())) {
             // check if the file is tracked in the current branch
             if (!(new File(currBranchDir, f.getName())).exists()
-                && (new File(workingDir, f.getName())).exists()) {
+                    && (new File(WORKING_DIR, f.getName())).exists()) {
                 System.out.println("Warning:");
-                System.out.println("    There is an untracked file: "  + f.getName() + "; delete it or add it first.");
+                System.out.println("    There is an "
+                        + "untracked file: "  + f.getName() + "; delete it or add it first.");
                 return;
             }
 
             // skipp the logMessage.txt, timeStamp.txt, and parentHash.txt
             if ((f.getName().equals("logMessage.txt")) || (f.getName().equals("timeStamp.txt")
-                || (f.getName().equals("parentHash.txt")))) {
+                    || (f.getName().equals("parentHash.txt")))) {
                 continue;
             }
 
@@ -149,7 +216,7 @@ public class Checkout {
                 return;
             }
 
-            File fileInWorkingDir = new File(workingDir, fileToCheckout.getName());
+            File fileInWorkingDir = new File(WORKING_DIR, fileToCheckout.getName());
             if (fileInWorkingDir.exists()) {
                 if (!fileInWorkingDir.delete()) {
                     System.out.println("Error:");
@@ -159,7 +226,7 @@ public class Checkout {
             }
 
             try {
-                Files.copy(fileToCheckout.toPath(), (new File(workingDir, f.getName())).toPath());
+                Files.copy(fileToCheckout.toPath(), (new File(WORKING_DIR, f.getName())).toPath());
             } catch (IOException e) {
                 System.out.println("Error:");
                 System.out.println("    Could not copy file to working directory.");
@@ -167,11 +234,11 @@ public class Checkout {
         }
 
         // process the files in the current branch
-        currBranchDir = new File(commitsDir, currBranch);
+        currBranchDir = new File(COMMITS_DIR, currBranch);
         for (File f : Objects.requireNonNull(currBranchDir.listFiles())) {
             // ignore the logMessage.txt, timeStamp.txt, and parentHash.txt
             if ((f.getName().equals("logMessage.txt")) || (f.getName().equals("timeStamp.txt")
-                || (f.getName().equals("parentHash.txt")))) {
+                    || (f.getName().equals("parentHash.txt")))) {
                 continue;
             }
 
@@ -187,7 +254,7 @@ public class Checkout {
 
         // update the branch history
         branchHistory.put("HEAD", branchName);
-        File pointers = new File(branchDir, "pointers.txt");
+        File pointers = new File(BRANCH_DIR, "pointers.txt");
         try {
             ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(pointers));
             out.writeObject(branchHistory);

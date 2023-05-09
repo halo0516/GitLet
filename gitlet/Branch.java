@@ -13,13 +13,13 @@ public class Branch {
     String currentDirectory = System.getProperty("user.dir");
     String serializablePath = currentDirectory + "/.gitlet/branch";
     String head = "HEAD";
-    String pointersPath = serializablePath +"/pointers.txt";
+    String pointersPath = serializablePath + "/pointers.txt";
 
     public void branch(String branchName) {
 
         TreeMap<String, String> commitPointers = getInput(pointersPath);
 
-        if(commitPointers.containsKey(branchName)) {
+        if (commitPointers.containsKey(branchName)) {
             System.out.println("current branch already exists");
             return;
         }
@@ -29,16 +29,16 @@ public class Branch {
         commitPointers.put(branchName, currentCommit);
         String jointName = "";
 
-        if(headBranchName.compareTo(branchName) < 0) {
+        if (headBranchName.compareTo(branchName) < 0) {
             jointName = headBranchName + "/" + branchName;
-        } else{
+        } else {
             jointName = branchName + "/" + headBranchName;
         }
         commitPointers.put(jointName, currentCommit);
 
         String latestLogPath = serializablePath + "/removedMark" + headBranchName + ".txt";
         String newPath = serializablePath + "/removedMark" + headBranchName + ".txt";
-        if(new File(latestLogPath).exists()) {
+        if (new File(latestLogPath).exists()) {
             try {
                 Files.copy(new File(latestLogPath).toPath(),
                         new File(newPath).toPath());
@@ -53,7 +53,7 @@ public class Branch {
     public void rmBranch(String branchName) {
         TreeMap<String, String> commitPointers = getInput(pointersPath);
         commitPointers.remove(branchName);
-        String deletePath = serializablePath +"/removedMark" + branchName + ".txt";
+        String deletePath = serializablePath + "/removedMark" + branchName + ".txt";
         File file = new File(deletePath);
         file.delete();
 
@@ -64,7 +64,8 @@ public class Branch {
         TreeMap<String, String> commitPointers = new TreeMap<>();
 
         try {
-            ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(filePath));
+            ObjectInputStream objectInputStream = new ObjectInputStream(
+                    new FileInputStream(filePath));
             commitPointers = (TreeMap<String, String>) objectInputStream.readObject();
             objectInputStream.close();
         } catch (IOException | ClassNotFoundException e) {

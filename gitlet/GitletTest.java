@@ -56,8 +56,16 @@ public class GitletTest {
         assertTrue(stagedFile.exists());
         stage.status();
 
+        // Create a commit with a log message
+        Commit commit = new Commit("Commit 1", false);
+        commit.commit(false);
+
+        // Check find command
+        Find find = new Find();
+        find.find("Commit 1");
+
         // Remove the test file from the staging area
-        stage.rm(testFile);
+        (new Stage()).rm(testFile);
 
         // Ensure the test file is removed from the staging area
         assertFalse(stagedFile.exists());

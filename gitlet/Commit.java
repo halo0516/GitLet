@@ -133,10 +133,7 @@ public class Commit implements Serializable {
 
         if (!stageSet.isEmpty()) {
             for (File f : Objects.requireNonNull(STAGING_AREA.listFiles())) {
-                if (f.renameTo(new File(COMMIT_DIR + "/" + commitHash + "/" + f.getName()))) {
-                    System.out.println("File renaming failed.");
-                    return;
-                }
+                f.renameTo(new File(COMMIT_DIR + "/" + commitHash + "/" + f.getName()));
                 tracked.add(f.getName());
             }
         }

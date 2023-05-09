@@ -22,6 +22,7 @@ public class Main {
         switch (firstArg) {
             case "init" -> (new Init()).init();
             case "add" -> (new Stage()).add(new File(args[1]));
+            case "rm" -> (new Stage()).rm(new File(args[1]));
             case "global-log" -> (new Log()).globalLog();
             case "log" -> (new Log()).log();
             case "find" -> find(args);
@@ -30,6 +31,7 @@ public class Main {
             case "branch" -> (new Branch()).branch(args[1]);
             case "rm-branch" -> (new Branch()).rmBranch(args[1]);
             case "reset" -> (new Reset()).reset(args[1]);
+            case "merge" -> (new Merge()).merge(args[1]);
             default -> {}
         }
     }

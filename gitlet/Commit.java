@@ -45,7 +45,8 @@ public class Commit implements Serializable {
 
     /**
      * Constructs a Commit object using a log message and an initial flag.
-     * Initializes the commit's log message, timestamp, pointers, tracked files, and removedMark set.
+     * Initializes the commit's log message, timestamp, pointers, tracked files,
+     * and removedMark set.
      * If the commit is not initial, sets the previous commit's files.
      * Also adds files from the staging area to the stageSet.
      *
@@ -58,8 +59,8 @@ public class Commit implements Serializable {
         this.timeStamp = df.format(new Date());
         this.pointers = readObjectFromFile(SERIALIZED_DIR + "/pointers.txt", new TreeMap<>());
         this.tracked = readObjectFromFile(SERIALIZED_DIR + "/tracked.txt", new TreeSet<>());
-        this.removedMark = readObjectFromFile(SERIALIZED_DIR + "/removedMark" + pointers.get("HEAD") + ".txt",
-                new TreeSet<>());
+        this.removedMark = readObjectFromFile(
+                SERIALIZED_DIR + "/removedMark" + pointers.get("HEAD") + ".txt", new TreeSet<>());
 
         if (pointers.containsKey("HEAD")) {
             this.parentHash = pointers.get(pointers.get("HEAD"));
@@ -76,17 +77,19 @@ public class Commit implements Serializable {
 
     /**
      * Commits changes to the repository by creating a new commit object and storing it.
-     * If there are no changes added to the commit, and it is not initial, prints a message and returns.
-     * Deletes files in the removed files directory, and checks if the log message is provided.
-     * Creates a new commit folder and writes the commit's log message, timestamp, and parent hash to files.
-     * Copies files from the previous commit to the new commit folder and moves files from the staging area.
-     * Updates pointers and tracked files and writes them to serialized files.
+     * If there are no changes added to the commit, and it is not initial, prints a message
+     * and returns. Deletes files in the removed files directory, and checks if the log message
+     * is provided. Creates a new commit folder and writes the commit's log message, timestamp,
+     * and parent hash to files. Copies files from the previous commit to the new commit folder
+     * and moves files from the staging area. Updates pointers and tracked files and writes them
+     * to serialized files.
      *
      * @param initial A boolean indicating whether the commit is an initial commit or not.
      * @throws IOException If an I/O error occurs during the commit process.
      */
     public void commit(boolean initial) throws IOException {
-        if (stageSet.isEmpty() && !initial && Objects.requireNonNull(REMOVED_FILES.listFiles()).length == 0) {
+        if (stageSet.isEmpty()
+                && !initial && Objects.requireNonNull(REMOVED_FILES.listFiles()).length == 0) {
             System.out.println("No changes added to the commit.");
             return;
         }
@@ -126,7 +129,8 @@ public class Commit implements Serializable {
                         !f.getName().equals("timeStamp.txt") &&
                         !f.getName().equals("parentHash.txt") &&
                         !removedMark.contains(f.getName())) {
-                    Files.copy(f.toPath(), Paths.get(COMMIT_DIR + "/" + commitHash + "/" + f.getName()));
+                    Files.copy(f.toPath(),
+                            Paths.get(COMMIT_DIR + "/" + commitHash + "/" + f.getName()));
                 }
             }
         }
@@ -155,12 +159,15 @@ public class Commit implements Serializable {
 
     /**
      * [Helper Method]
-     * Reads an object from a file and returns the object, or returns a default value if an exception occurs.
+     * Reads an object from a file and returns the object, or returns a default value
+     * if an exception occurs.
      * Utilizes Java's built-in object serialization to read the object from the file.
-     * Catches IOException and ClassNotFoundException and returns the provided default value in case of an error.
+     * Catches IOException and ClassNotFoundException and returns the provided default
+     * value in case of an error.
      *
      * @param filePath The path to the file containing the serialized object.
-     * @param defaultValue The default value to be returned if an exception occurs during deserialization.
+     * @param defaultValue The default value to be returned if an exception occurs during
+     *                     deserialization.
      * @param <T> The type of the object to be read from the file.
      * @return The deserialized object if successful, or the default value if an exception occurs.
      */

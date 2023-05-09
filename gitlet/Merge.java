@@ -9,15 +9,18 @@ import java.util.HashSet;
 import java.util.TreeMap;
 
 /**
- * Merge class is responsible for performing the merge operation in the gitlet version control system.
+ * Merge class is responsible for performing the merge operation in the gitlet
+ * version control system.
+ *
+ * @author Zitong Shi
  */
 
 public class Merge {
     String workDirectory = System.getProperty("user.dir");
-    String stagingPath =   workDirectory + "/.gitlet/Staging Area";
-    String branchPath =  workDirectory + "/.gitlet/branch";
-    String pointersPath = branchPath +"/pointers.txt";
-    String commitPath = branchPath + "/.gitlet/Commits/";
+    String stagingPath = workDirectory + "/.gitlet/stage";
+    String branchPath = workDirectory + "/.gitlet/branch";
+    String pointersPath = branchPath + "/pointers.txt";
+    String commitPath = branchPath + "/.gitlet/commit";
     String splitCommitID = "";
     String branchCommitID = "";
     String currHeadCommitID = "";
@@ -32,8 +35,9 @@ public class Merge {
      */
     public void merge(String branchName) throws IOException {
         //check for staging, if staging, cannot merge
-        if(hasStagingFile()) {
-            System.out.println("Cann't merge, please discard or commit the staging file");
+        if (hasStagingFile()) {
+            System.out.println("Cann't merge, please discard or commit " +
+                    "the staging file");
         }
 
         //read in the commit map
@@ -50,14 +54,14 @@ public class Merge {
         HashSet<String> headUnModifiedFile = new HashSet<>();
         HashSet<String> headModifiedFile = new HashSet<>();
         HashSet<String> headDeleledFile = new HashSet<>();
-        CategorizeFiles(currHeadCommitID, splitCommitID, headUnModifiedFile, headModifiedFile,
+        categorizeFiles(currHeadCommitID, splitCommitID, headUnModifiedFile, headModifiedFile,
                 headDeleledFile);
 
         //category files headBranch
         HashSet<String> branchUnModifiedFile = new HashSet<>();
         HashSet<String> branchModifiedFile = new HashSet<>();
         HashSet<String> branchDeleledFile = new HashSet<>();
-        CategorizeFiles(branchCommitID, splitCommitID, branchUnModifiedFile, branchModifiedFile,
+        categorizeFiles(branchCommitID, splitCommitID, branchUnModifiedFile, branchModifiedFile,
                 branchDeleledFile);
 
 
@@ -67,38 +71,38 @@ public class Merge {
 
         //Case1: only branch modified the file
         for (String fileName: branchModifiedFile) {
-            if(!headUnModifiedFile.contains(fileName)) {
+            if (!headUnModifiedFile.contains(fileName)) {
                 continue;
             }
             //replace the file in the wd to branch
-            Files.copy(new File( branchCommit+ "/" + fileName).toPath(),
-                    new File(workDirectory+ "/" + fileName).toPath());
+            Files.copy(new File(branchCommit + "/" + fileName).toPath(),
+                    new File(workDirectory + "/" + fileName).toPath());
             // stage the file
             Files.copy(new File(branchCommit + "/" + fileName).toPath(),
-                    new File(stagingPath +"/" + fileName).toPath());
+                    new File(stagingPath + "/" + fileName).toPath());
         }
 
         //Case2: only branch modified the file
         File[] branchFiles = new File(commitPath + branchCommitID).listFiles();
-         for (File file: branchFiles) {
-             String fileName = file.getName();
-             File currFile = new File(currCommitPath + "/" + fileName);
-             File split = new File(splitCommitPath + "/" + fileName);
-             if(!currFile.exists() && !split.exists()) {
-                 new Checkout().checkoutFile(fileName, branchCommitID);
-                 // stage the file
-                 Files.copy(new File(branchCommit + "/" + fileName).toPath(),
-                         new File(stagingPath +"/" + fileName).toPath());
-             }
-         }
+        for (File file: branchFiles) {
+            String fileName = file.getName();
+            File currFile = new File(currCommitPath + "/" + fileName);
+            File split = new File(splitCommitPath + "/" + fileName);
+            if (!currFile.exists() && !split.exists()) {
+                new Checkout().checkoutFile(fileName, branchCommitID);
+                // stage the file
+                Files.copy(new File(branchCommit + "/" + fileName).toPath(),
+                     new File(stagingPath + "/" + fileName).toPath());
+            }
+        }
 
          //case 3:in split and unmodified by curr but delete by branch
         File[] splitFiles = new File(commitPath + splitCommitID).listFiles();
         for (File file: splitFiles) {
-            if(headUnModifiedFile.contains(file.getName()) &&
-            !new File(branchCommit + "/" + file.getName()).exists()) {
+            if (headUnModifiedFile.contains(file.getName()) &&
+                !new File(branchCommit + "/" + file.getName()).exists()) {
                 //delete from the wd
-                new File(workDirectory+ "/" + file.getName()).delete();
+                new File(workDirectory + "/" + file.getName()).delete();
             }
         }
 
@@ -106,8 +110,8 @@ public class Merge {
         new Commit(commitName, false).commit(false);
     }
 
-    private void CategorizeFiles(String currCommitID, String splitCommitID,
-                                  HashSet<String> UnModifiedFile,
+    private void categorizeFiles(String currCommitID, String splitCommitID,
+                                  HashSet<String> unModifiedFile,
                                   HashSet<String> modifiedFile,
                                   HashSet<String> deletedFile) {
 
@@ -115,15 +119,15 @@ public class Merge {
         File[] splitPointFiles = new File(commitPath + splitCommitID).listFiles();
 
         for (File currFile: currFiles) {
-            if(isUtilFile(currFile)) {
+            if (isUtilFile(currFile)) {
                 continue;
             }
 
-            if(new File(commitPath + splitCommitID + "/" + currFile.getName()).exists()) {
+            if (new File(commitPath + splitCommitID + "/" + currFile.getName()).exists()) {
                 File splitFile = new File(commitPath + splitCommitID + "/" + currFile.getName());
-                if(splitFile.exists()) {
+                if (splitFile.exists()) {
                     if (isSame(currFile, splitFile)) {
-                        UnModifiedFile.add(currFile.getName());
+                        unModifiedFile.add(currFile.getName());
                     } else {
                         modifiedFile.add(currFile.getName());
                     }
@@ -134,9 +138,9 @@ public class Merge {
         }
 
         for (File splitFile: splitPointFiles) {
-            if(new File(commitPath + currCommitID + "/" + splitFile.getName()).exists()) {
+            if (new File(commitPath + currCommitID + "/" + splitFile.getName()).exists()) {
                 continue;
-            } else{
+            } else {
                 deletedFile.add(splitFile.getName());
             }
         }
@@ -144,7 +148,7 @@ public class Merge {
 
     private boolean isSame(File currFile, File splitFile) {
         String currHashID = Utils.sha1(new String(Utils.readContents(currFile)));
-        String splitHashID= Utils.sha1(new String(Utils.readContents(splitFile)));
+        String splitHashID = Utils.sha1(new String(Utils.readContents(splitFile)));
 
         return currHashID.equals(splitHashID);
     }
@@ -160,7 +164,7 @@ public class Merge {
 
     private String getSplitPoint(String currBranchName, String branchName) {
         String splitKey = "";
-        if(currBranchName.compareTo(branchName) < 0) {
+        if (currBranchName.compareTo(branchName) < 0) {
             splitKey = currBranchName + "/" + branchName;
         } else {
             splitKey = branchName + "/" + currBranchName;
@@ -178,7 +182,8 @@ public class Merge {
         TreeMap<String, String> commitPointers = new TreeMap<>();
 
         try {
-            ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(filePath));
+            ObjectInputStream objectInputStream =
+                    new ObjectInputStream(new FileInputStream(filePath));
             commitPointers = (TreeMap<String, String>) objectInputStream.readObject();
             objectInputStream.close();
         } catch (IOException e) {

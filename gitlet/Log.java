@@ -19,8 +19,9 @@ import java.util.TreeMap;
  * @author Lang Qin, Yuxiang Wang
  */
 public class Log {
-    private static final File cPath = new File(System.getProperty("user.dir") + "/.gitlet/commits");
-    private static final File headPath = new File(System.getProperty("user.dir")
+    private static final File COMMIT_DIR =
+            new File(System.getProperty("user.dir") + "/.gitlet/commits");
+    private static final File HEAD_DIR = new File(System.getProperty("user.dir")
             + "/.gitlet/branch/pointers.txt");
 
     private TreeMap<String, String> head;
@@ -31,13 +32,13 @@ public class Log {
      * Displays the commit log for the current branch.
      */
     public void log() {
-        if (cPath.listFiles() != null) {
+        if (COMMIT_DIR.listFiles() != null) {
             loadHead();
 
             String currentBranch = head.get("HEAD");
             currentCommit = head.get(currentBranch);
 
-            while (new File(cPath + "/" + currentCommit + "/parentHash.txt").exists()) {
+            while (new File(COMMIT_DIR + "/" + currentCommit + "/parentHash.txt").exists()) {
                 displayCommitInfo();
                 currentCommit = parentID;
                 updateParentID();
@@ -51,8 +52,8 @@ public class Log {
      * Displays the commit log for all branches.
      */
     public void globalLog() {
-        if (cPath.listFiles() != null) {
-            for (File f : Objects.requireNonNull(cPath.listFiles())) {
+        if (COMMIT_DIR.listFiles() != null) {
+            for (File f : Objects.requireNonNull(COMMIT_DIR.listFiles())) {
                 currentCommit = f.getName();
                 displayCommitInfo();
             }
@@ -63,7 +64,7 @@ public class Log {
      * Loads the head reference from the serialized file.
      */
     private void loadHead() {
-        try (FileInputStream fileIn = new FileInputStream(headPath);
+        try (FileInputStream fileIn = new FileInputStream(HEAD_DIR);
              ObjectInputStream inp = new ObjectInputStream(fileIn)) {
             this.head = (TreeMap<String, String>) inp.readObject();
         } catch (IOException | ClassNotFoundException excp) {
@@ -75,9 +76,9 @@ public class Log {
      * Updates the parentID from the currentCommit.
      */
     private void updateParentID() {
-        if (new File(cPath + "/" + currentCommit + "/parentHash.txt").exists()) {
+        if (new File(COMMIT_DIR + "/" + currentCommit + "/parentHash.txt").exists()) {
             parentID = new String(Utils.readContents(
-                    new File(cPath + "/" + currentCommit + "/parentHash.txt")));
+                    new File(COMMIT_DIR + "/" + currentCommit + "/parentHash.txt")));
         }
     }
 
@@ -85,9 +86,9 @@ public class Log {
      * Displays commit information for the currentCommit.
      */
     private void displayCommitInfo() {
-        String logmsg = new String(Utils.readContents(new File(cPath
+        String logmsg = new String(Utils.readContents(new File(COMMIT_DIR
                 + "/" + currentCommit + "/logMessage.txt")));
-        String timestamp = new String(Utils.readContents(new File(cPath
+        String timestamp = new String(Utils.readContents(new File(COMMIT_DIR
                 + "/" + currentCommit + "/timeStamp.txt")));
         System.out.println("===");
         System.out.println("Commit " + currentCommit);

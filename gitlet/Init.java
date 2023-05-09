@@ -50,7 +50,7 @@ public class Init {
           </>
           When you make changes to files in your working directory and add them using git add,
           the changes are staged in the index file. The index file then serves as an intermediate
-          state between the working directory and the actual Git repository. When you run git commit,
+          state between the working directory and the actual Git repository. When you run git commit
           the changes staged in the index are saved as a new commit in the repository.
          */
         File stageDir = new File(gitDir, "stage/");
@@ -65,22 +65,24 @@ public class Init {
           Commits directory is where commits are stored.
           This is similar to the .git/objects directory in Git.
           </>
-          The .git/objects directory in a Git repository is essential for storing and managing all the
-          objects that Git creates and uses during its operation. Git objects are the internal representation
-          of various elements in a Git repository, such as commits, trees, and blobs.
+          The .git/objects directory in a Git repository is essential for storing and managing
+          all the objects that Git creates and uses during its operation. Git objects are the
+          internal representation of various elements in a Git repository, such as commits, trees,
+          and blobs.
           </>
           There are four main types of Git objects:
-          - Blob: A blob object represents the content of a file. It stores the file data but not the file name
-                  or other metadata. Each unique file content has a corresponding unique blob object.
+          - Blob: A blob object represents the content of a file. It stores the file data but
+          not the file name or other metadata. Each unique file content has a corresponding unique
+          blob object.
 
-          - Tree: A tree object represents a directory. It stores references to the blobs and trees that are
-                  contained in the directory, along with the file names and other metadata.
+          - Tree: A tree object represents a directory. It stores references to the blobs and
+          trees that are contained in the directory, along with the file names and other metadata.
 
-          - Commit: A commit object represents a snapshot of the repository. It is used to mark specific points in
-                    the repository's history, typically for versioning or release purposes.
+          - Commit: A commit object represents a snapshot of the repository. It is used to mark
+          specific points in the repository's history, typically for versioning or release purposes.
           </>
-          The .git/objects directory organizes these objects in a content-addressable storage system. Each object is
-          identified by a unique SHA-1 hash, which is based on its content.
+          The .git/objects directory organizes these objects in a content-addressable storage system
+          Each object is identified by a unique SHA-1 hash, which is based on its content.
          */
         File commitDir = new File(gitDir, "commits/");
         if (!commitDir.mkdir()) {
@@ -95,12 +97,17 @@ public class Init {
          * This is similar to the .git/refs directory in Git.
          * This is the same as the Serialized directory in our Study Guide.
          * </>
-         * The .git/refs directory in a Git repository is essential for storing and managing references.
-         * A reference is a pointer to a commit object. It is used to keep track of the commit that represents
+         * The .git/refs directory in a Git repository is essential for storing and managing
+         * references.
+         * A reference is a pointer to a commit object. It is used to keep track of the commit that
+         * represents
          * the tip of a branch.
          * </>
-         * There is a special reference called HEAD, stored in the .git directory itself as .git/HEAD. The HEAD
-         * reference points to the current branch, and by extension, to the latest commit on that branch. When you
+         * There is a special reference called HEAD, stored in the .git directory itself as
+         * .git/HEAD.
+         * The HEAD reference points to the current branch, and by extension, to the latest commit
+         * on that branch.
+         * When you
          * switch branches, the HEAD reference is updated to point to the new branch.
          */
         File branchDir = new File(gitDir, "branch/");

@@ -10,7 +10,8 @@ import java.util.Objects;
  * @author Lang Qin, Yuxiang Wang
  */
 public class Find {
-    private static final File COMMIT_DIR = new File(System.getProperty("user.dir") + "/.gitlet/Commits");
+    private static final File COMMIT_DIR =
+            new File(System.getProperty("user.dir") + "/.gitlet/Commits");
 
     /**
      * Searches for and displays the commit IDs with the given commit message.

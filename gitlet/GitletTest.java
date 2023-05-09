@@ -8,7 +8,6 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -112,7 +111,8 @@ public class GitletTest {
         branch.branch("new_branch");
 
         // Check if the new branch was created successfully
-        File branchPointersFile = new File(System.getProperty("user.dir") + "/.gitlet/branch/pointers.txt");
+        File branchPointersFile =
+                new File(System.getProperty("user.dir") + "/.gitlet/branch/pointers.txt");
         try {
             FileInputStream fis = new FileInputStream(branchPointersFile);
             ObjectInputStream ois = new ObjectInputStream(fis);
@@ -145,7 +145,8 @@ public class GitletTest {
         branch.rmBranch("new_branch");
 
         // Check if the new branch was removed successfully
-        File branchPointersFile = new File(System.getProperty("user.dir") + "/.gitlet/branch/pointers.txt");
+        File branchPointersFile =
+                new File(System.getProperty("user.dir") + "/.gitlet/branch/pointers.txt");
         try {
             FileInputStream fis = new FileInputStream(branchPointersFile);
             ObjectInputStream ois = new ObjectInputStream(fis);

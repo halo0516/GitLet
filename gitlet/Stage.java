@@ -21,7 +21,7 @@ import java.util.TreeSet;
  *     java gitlet.Main rm [filename]
  * <p>
  *
- * @author Jiaying Hou
+ * @author Jiaying Hou, Lang Qin
  */
 
 public class Stage {
